@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="dcterms.date" content="2026-04-24" />
+  <title>Agentic AI 推理中机头 CPU 的完整综述：从算子下发到 KV 生命周期、MoE 编排与平台演化</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Agentic AI 推理中机头 CPU 的完整综述：从算子下发到 KV
+生命周期、MoE 编排与平台演化</h1>
+<p class="subtitle">Export-Ready Review</p>
+<p class="date">2026-04-24</p>
+</header>
+<nav id="TOC" role="doc-toc">
+
+</nav>
+<h1
+id="agentic-ai-推理中机头-cpu-的完整综述从算子下发到-kv-生命周期moe-编排与平台演化">Agentic
+AI 推理中机头 CPU 的完整综述：从算子下发到 KV 生命周期、MoE
+编排与平台演化</h1>
+<blockquote>
+<p>Updated: 2026-04-24<br />
+Date boundary: 主体证据仅采用 <code>2025-07-01</code>
+及之后的公开资料；个别未公开精确发布日期的官方文档仅作补充说明。<br />
+Scope: 本文只讨论 <code>agentic LLM inference</code> 对机头 CPU
+的影响，不将工具执行本身的 CPU 消耗计入主结论。<br />
+Material base: 基于 现有材料
+目录中的报告、图表、下载引用材料与既有综述整理而成。</p>
+</blockquote>
+<h2 id="摘要">摘要</h2>
+<p>Agentic AI 推理正在把系统优化的重心，从“让 GPU
+算得更快”推进到“让整个推理控制链路不阻塞
+GPU”。围绕这一变化，现有材料
+目录中的资料可以被收敛成五条主线：<code>算子下发与状态驱动调度</code>、<code>KV cache 卸载与生命周期管理</code>、<code>MoE 的 host-side orchestration</code>、<code>真实 agentic workload 对传统 serving 假设的修正</code>、以及
+<code>Vera / Rubin / BlueField-4 / CXL</code>
+所代表的平台侧收敛。综合这些材料，较稳健的结论是：机头 CPU
+的角色已经从传统 host 演化为推理系统的第一层
+orchestrator，其核心任务不再是辅助 GPU，而是管理请求接入、阶段切换、KV
+放置、跨池传输、专家驻留与多代理并发控制，避免 GPU
+因调度、状态和传输失配而空等 [1][2][6][9][10][11][12][22][23]。</p>
+<p><strong>关键词：</strong> agentic AI；LLM inference；host
+CPU；operator dispatch；KV cache offloading；MoE；prefill-decode
+disaggregation</p>
+<h2
+id="一总论为什么机头-cpu-成为-agentic-推理的关键变量">一、总论：为什么机头
+CPU 成为 agentic 推理的关键变量</h2>
+<h3 id="核心判断">1.1 核心判断</h3>
+<p>如果把 现有材料
+中的论文、厂商文档与产品工作负载放在一起看，机头 CPU
+的重要性并不是因为它重新承担矩阵运算，而是因为 agentic inference
+改写了系统瓶颈的分布方式：</p>
+<ol type="1">
+<li>请求不再是单轮、连续、稳定的 decode 流。<br />
+</li>
+<li>状态不再是一次性中间产物，而是需要保留、恢复、分叉和复用的长期对象。<br />
+</li>
+<li>GPU 不再只依赖本地 HBM，而要与 host memory、CXL、网络存储和跨节点
+worker 协同。<br />
+</li>
+<li>多代理、子会话和多模态 ingress 让 host 侧调度链路显著变长。</li>
+</ol>
+<p>因此，对 agentic inference 而言，真正稀缺的不只是 GPU FLOPS，而是
+<code>host-side orchestration budget</code> [2][9][16][22][23]。</p>
+<p><img src="assets/cpu-centric-agentic-workflow.png" alt="Agentic inference 中 CPU 作为控制中枢的工作流示意" width="760"></p>
+<p><strong>图1</strong> Agentic 推理中的 CPU-centric
+workflow。该图从工作流层面展示了 CPU
+如何介入请求接入、状态管理、传输触发和 GPU
+执行协调，适合作为全文总图。来源：作者根据解耦 serving、agentic
+KV、subagent / swarm / mobile agent 等公开资料整理
+[9][22][24][26][27]。</p>
+<h3 id="本文的综述框架">1.2 本文的综述框架</h3>
+<p>本文采用“总分总”结构，主结论先行，随后分别回答四个问题：</p>
+<ol type="1">
+<li>为什么算子下发会从微观开销演化为系统瓶颈？<br />
+</li>
+<li>为什么 KV 卸载的重点已经从“容量扩展”转向“生命周期管理”？<br />
+</li>
+<li>为什么 MoE 会把 CPU 重新推到关键路径？<br />
+</li>
+<li>为什么真实 agentic workload 会让传统 serving 论文低估 CPU
+压力？</li>
+</ol>
+<p>在此基础上，最后再讨论平台路线图已经给出了什么方向性信号，以及目前还缺什么证据。</p>
+<h2
+id="二先看结论五条最稳健的综述判断">二、先看结论：五条最稳健的综述判断</h2>
+<h3 id="结论一机头-cpu-已进入推理关键路径">2.1 结论一：机头 CPU
+已进入推理关键路径</h3>
+<p>这不是一个抽象判断，而是被多条独立证据链支撑的系统事实：</p>
+<ul>
+<li>多 GPU 推理中，CPU oversubscription 会把原本微秒级的 launch /
+dequeue 延迟放大到毫秒级，并进一步放大为集群级等待 [2]。<br />
+</li>
+<li>PD 分离与解耦 serving 使 host 侧职责从单机 launch
+扩展到跨阶段路由、状态搬运和传输协调 [22][23]。<br />
+</li>
+<li>agentic inference 的 KV 访问模式表现出 <code>11.7x</code> 的
+read/write
+ratio，说明系统压力已从“持续写新状态”转向“恢复、复用、路由旧状态”
+[9]。<br />
+</li>
+<li>MoE 推理要求 host 持续参与 expert
+residency、预取和通信编排，而不仅仅是发起一次前向传播
+[11][12][28]。</li>
+</ul>
+<h3 id="结论二cpu-问题的本质不是算得慢而是控制链路太长">2.2 结论二：CPU
+问题的本质不是“算得慢”，而是“控制链路太长”</h3>
+<p>在 agentic inference 中，CPU
+侧真正消耗预算的往往不是纯计算，而是这些步骤：</p>
+<ul>
+<li>request ingress<br />
+</li>
+<li>prefill/decode stage transition<br />
+</li>
+<li>batch 组织与增量更新<br />
+</li>
+<li>KV 放置、回收、预取、恢复<br />
+</li>
+<li>跨节点传输与完成队列管理<br />
+</li>
+<li>expert routing 与 collective orchestration</li>
+</ul>
+<p>这也是为什么现代优化越来越集中在
+<code>persistent batch</code>、<code>CUDA graphs</code>、<code>persistent kernels</code>、<code>KV transfer library</code>
+和 <code>decoupled residency</code> 上：这些技术的共同目标不是让 CPU
+更强，而是让 CPU 更少地成为同步阻塞点 [4][5][11][12][23]。</p>
+<h3 id="结论三kv-已从容量对象变成生命周期对象">2.3 结论三：KV
+已从容量对象变成生命周期对象</h3>
+<p>传统推理里，KV cache 常被当作“长上下文需要的显存扩展”；但在 agentic
+inference 中，KV 更像一个长期状态对象，需要被保留、检索、恢复和复用
+[6][7][9][10]。</p>
+<h3 id="结论四moe-节省了-gpu-计算却抬高了-host-编排价值">2.4 结论四：MoE
+节省了 GPU 计算，却抬高了 host 编排价值</h3>
+<p>MoE 减少的是每 token
+激活计算，不是系统编排复杂度。专家数增大、驻留空间受限、跨设备
+all-to-all 与异步预取叠加后，host-side orchestration
+很容易成为新的吞吐上限 [11][12][28][30]。</p>
+<h3 id="结论五平台路线图已经围绕cpu-作为控制平面开始收敛">2.5
+结论五：平台路线图已经围绕“CPU 作为控制平面”开始收敛</h3>
+<p>Vera 的高带宽主机内存、NVLink-C2C、一体化平台组织方式，以及
+BlueField-4
+对网络/存储/安全的旁路，传递的不是单点产品宣传，而是平台层面对
+<code>CPU as orchestration plane</code> 的确认
+[13][14][17][22][28]。</p>
+<h2
+id="三分论之一算子下发为什么从-launch-overhead-变成调度墙">三、分论之一：算子下发为什么从
+launch overhead 变成调度墙</h2>
+<h3 id="量化小模型与高并发共同放大-host-固定成本">3.1
+量化、小模型与高并发共同放大 host 固定成本</h3>
+<p><code>report.md</code>
+和相关引用材料给出了一条很清晰的因果链：</p>
+<ul>
+<li>模型被进一步量化之后，单次 GPU 计算粒度缩小。<br />
+</li>
+<li>计算粒度缩小后，kernel launch、队列维护、runtime
+调度等固定成本占比迅速升高。<br />
+</li>
+<li>一旦 CPU oversubscription 或 service stack 抖动进入关键路径，GPU
+便会开始空等 [2][3][4][5]。</li>
+</ul>
+<p>一个具有代表性的工程测量是：某量化小模型一次前向传播发射 301 个
+kernel，单个 launch 开销约 2.5 微秒，仅纯下发税就累计到约 750 微秒；通过
+kernel fusion 将发射数降到 181 个后，吞吐从 1255 tok/s 提升到 1508
+tok/s，提升约 20% [3]。这个结果的含义不是“launch 很慢”，而是：当 GPU
+计算本体被压缩后，host 侧固定税费就会立刻浮出水面。</p>
+<h3 id="cpu-oversubscription-会把微秒问题放大成毫秒问题">3.2 CPU
+oversubscription 会把微秒问题放大成毫秒问题</h3>
+<p>《Characterizing CPU-Induced Slowdowns in Multi-GPU LLM
+Inference》进一步把这一点系统化了 [2]。文中显示：</p>
+<ul>
+<li>在 H100 上运行的某些 vLLM 路径中，HTTP 服务约占 33%
+的执行时间，调度与输入准备约占 29%，GPU 计算仅约占 38%。<br />
+</li>
+<li>在 TP=4、5 req/s、100k token 输入的场景下，广播队列 dequeue 延迟可从
+12 ms 恶化到 228 ms，放大约 19 倍。</li>
+</ul>
+<p>这里的关键并不是某个具体数字，而是说明：在多 GPU serving
+中，一个被抢占的 host 线程足以拖慢整个同步链路。</p>
+<p><img src="assets/extracted/cpu-slowdown-01.png" alt="CPU-induced slowdown 论文中的多GPU推理慢化图" width="760"></p>
+<p><strong>图2</strong> 多 GPU LLM inference 中的 CPU-induced slowdown
+示例图。该类图的意义不在于单个模型或单台机器的绝对数值，而在于直观展示
+host 抖动如何被放大为端到端慢化。来源：CPU slowdown 论文图页 [2]。</p>
+<h3 id="agentic-inference-为什么比普通-chat-更容易撞上调度墙">3.3
+Agentic inference 为什么比普通 chat 更容易撞上调度墙</h3>
+<p>相比“单条上下文、长 decode、稳定批次”的传统假设，agentic inference
+更常见的是：</p>
+<ol type="1">
+<li>高频 prefill<br />
+</li>
+<li>短 decode<br />
+</li>
+<li>状态暂停与恢复<br />
+</li>
+<li>多会话并发<br />
+</li>
+<li>子代理 fan-out/fan-in</li>
+</ol>
+<p>这让 host 侧不再只是“发起一次前向传播”，而是要持续处理 stage
+transition、context placement 和 request resumption
+[22][24][26][27]。</p>
+<p><img src="assets/nvidia-k8s-disagg-serving-2026.webp" alt="解耦式 LLM inference 中的 ingress router、prefill worker 和 decode worker" width="760"></p>
+<p><strong>图3</strong> 解耦式 serving 拓扑。图中 ingress
+router、prefill worker、decode worker 的拆分说明，host 侧已从单机 launch
+扩展为跨阶段路由和状态协调中枢。来源：NVIDIA, 2026 [22]。</p>
+<h3 id="现阶段最有效的缓解路线">3.4 现阶段最有效的缓解路线</h3>
+<p>从 现有材料
+汇总材料看，针对算子下发的有效路线主要有四类：</p>
+<ul>
+<li><code>kernel fusion / megakernel</code>：减少发射次数与跨 kernel
+边界同步 [3][4]。<br />
+</li>
+<li><code>persistent batch</code>：避免每步重建张量和 Python 数据结构
+[5]。<br />
+</li>
+<li><code>CUDA graph / piecewise capture</code>：用图执行降低重复 launch
+成本 [5]。<br />
+</li>
+<li><code>CPU isolation</code>：为 GPU worker 留出不被抢占的 host
+核心，削弱 OS 调度抖动 [2]。</li>
+</ul>
+<p>小结：算子下发已经不是一个局部 runtime 问题，而是 agentic inference
+下 host 侧控制链路被拉长后的系统性问题。</p>
+<h3 id="从引擎优化回看-cpu-的真实职责">3.5 从引擎优化回看 CPU
+的真实职责</h3>
+<p>如果把 vLLM V1、Event Tensor、解耦 serving 和 CPU slowdown
+这几类工作放在一起看，可以更具体地界定机头 CPU
+在算子下发问题中的职责边界：</p>
+<ul>
+<li>它要决定什么时候发起下一步计算。<br />
+</li>
+<li>它要决定哪些请求可以并批，哪些请求必须拆开。<br />
+</li>
+<li>它要决定某一步执行结束后，状态应该留在本地、发往远端还是进入 warm
+tier。<br />
+</li>
+<li>它还要维护 transport、queue 和 worker 之间的一致节奏。</li>
+</ul>
+<p>这说明“launch overhead”只是表层现象，底层问题其实是
+<code>control-path density</code> 在 agentic inference 中上升了：每单位
+GPU 计算量所对应的 host 控制动作更多、更碎、更难被隐藏
+[2][4][5][22][23]。因此，只要控制路径仍然被频繁打断，GPU
+算得再快，也会在系统层面失去意义。</p>
+<h2
+id="四分论之二kv-卸载为什么已从能不能放下变成如何管理生命周期">四、分论之二：KV
+卸载为什么已从“能不能放下”变成“如何管理生命周期”</h2>
+<h3 id="agentic-inference-改写了-kv-的访问模式">4.1 Agentic inference
+改写了 KV 的访问模式</h3>
+<p>关于 KV，现有材料 中最重要的证据不是“KV 很大”，而是 Dynamo
+agentic inference 材料给出的访问模式变化：高命中率与 <code>11.7x</code>
+的 read/write ratio 表明，系统的主要压力不再是不断写入新
+KV，而是频繁读取、路由、恢复和复用既有 KV [9]。</p>
+<p>换言之，在 agentic inference 中，KV
+不再只是“上下文长度的副产品”，而是可跨轮次保留、可跨 worker
+转移、可被多个子代理复用的长期状态。</p>
+<p><img src="assets/nvidia-dynamo-agentic-kv-readwrite-2026.webp" alt="Agentic inference 中累计 KV 读取远高于写入" width="760"></p>
+<p><strong>图4</strong> Agentic inference 的 KV
+读写关系。该图显示累计读取显著高于累计写入，说明真正吃预算的是恢复、预取与重用，而非持续生成新状态。来源：NVIDIA,
+2026 [9]。</p>
+<h3 id="cpu-角色已从搬运工变为-warm-tier-manager">4.2 CPU
+角色已从“搬运工”变为 warm-tier manager</h3>
+<p>NOSA、ScoutAttention 和 CoMEM 代表了三类不同但相互补充的路线：</p>
+<ul>
+<li>NOSA 通过稀疏注意力减少 CPU-GPU KV 传输量，在多个模型上实现最高
+<code>5.04x</code> 的解码吞吐提升 [6]。<br />
+</li>
+<li>ScoutAttention 让 CPU 提前一层参与 attention
+相关预计算，在精度损失小于 2.4% 的情况下实现约 <code>2.1x</code> 加速
+[7]。<br />
+</li>
+<li>CoMEM 则把长生命周期 agent memory 的压缩与主推理链路异步解耦，说明
+CPU 侧不仅可以做传输和预取，也可以承担部分状态整理与压缩任务 [8]。</li>
+</ul>
+<p>这些工作共同说明，CPU 在 KV 卸载系统中的位置已经变化：</p>
+<ul>
+<li>它不是简单的数据中转站。<br />
+</li>
+<li>它正在执行 placement、prefetch 和 resume path control。</li>
+</ul>
+<p><img src="assets/extracted/scoutattn-1.png" alt="ScoutAttention 或类似KV卸载论文中的系统示意图" width="760"></p>
+<p><strong>图5</strong> KV
+卸载/预计算类方法的系统示意图。此类图揭示的核心不是具体实现细节，而是
+CPU 已从被动存储代理变成主动参与预取、预计算和恢复控制的 warm-tier
+协调者。来源：ScoutAttention 论文图页 [7]。</p>
+<h3 id="kv-warm-tier-已经进入分层经济学阶段">4.3 KV warm tier
+已经进入分层经济学阶段</h3>
+<p>Grace/Blackwell coherent CPU-GPU memory 与 CXL 相关材料说明，现代 KV
+分层已经不应被简化为“HBM vs DRAM” [10][15][29]。更现实的体系是：</p>
+<ol type="1">
+<li>HBM<br />
+</li>
+<li>coherent CPU memory<br />
+</li>
+<li>host DRAM<br />
+</li>
+<li>CXL memory<br />
+</li>
+<li>local / remote storage</li>
+</ol>
+<p>其中，CXL 的意义不只是扩容。Astera Labs 给出的生产建模显示，CXL
+内存层可使 GPU 需求下降 87%，GPU 利用率提升 75%，每查询 CPU 利用率下降
+40%，并支持约 2 倍并发实例 [15]。这些数字说明，KV
+分层已经从“技术补丁”变成“容量-性能-成本”的架构选择题。</p>
+<p><img src="assets/cpu-gpu-unified-memory.webp" alt="CPU-GPU 统一地址空间与一致性互连示意" width="760"></p>
+<p><strong>图6</strong> CPU-GPU
+统一地址空间与一致性互连。高带宽一致性互连降低了 host memory
+参与恢复路径时的摩擦，使 CPU 内存更适合作为 KV warm tier。来源：NVIDIA,
+2025 [10]。</p>
+<h3 id="对机头-cpu-选型的直接影响">4.4 对机头 CPU 选型的直接影响</h3>
+<p>一旦 KV 成为长期状态对象，CPU 的需求就不再只看核心数，而要看：</p>
+<ul>
+<li>主机内存带宽<br />
+</li>
+<li>一致性互连<br />
+</li>
+<li>NUMA 摩擦<br />
+</li>
+<li>大容量内存挂接能力<br />
+</li>
+<li>恢复路径尾延迟</li>
+</ul>
+<p>这些指标之所以重要，是因为它们分别对应 warm-tier
+命中后的恢复成本、近端/远端分层摩擦以及大容量状态对象的放置效率；换句话说，机头
+CPU
+的选型已不再只是“多少核心更划算”，而是“哪种内存层级和互连方式更适合承担状态系统”
+[10][15][29]。</p>
+<p>小结：KV 卸载的重心已经从“把放不下的 KV
+挪出去”转向“如何以低尾延迟维护一套分层状态系统”，而 CPU
+正是这一系统的主执行者。</p>
+<h3 id="kv-lifecycle-可以拆成四个-cpu-控制动作">4.5 KV lifecycle
+可以拆成四个 CPU 控制动作</h3>
+<p>把这一章进一步压缩，可以把 KV lifecycle 理解成四个连续动作：</p>
+<ol type="1">
+<li><code>keep</code>：哪些状态继续留在热层。<br />
+</li>
+<li><code>demote</code>：哪些状态降到 host DRAM / CXL / storage。<br />
+</li>
+<li><code>prefetch</code>：哪些状态需要在恢复前被提前拉回。<br />
+</li>
+<li><code>resume</code>：恢复时如何把尾延迟控制在可接受范围内。</li>
+</ol>
+<p>这四步中，真正由 GPU 决定的内容很少，真正由 CPU
+决定的内容很多。因此，KV 卸载不是显存容量问题的附属解法，而是一个标准的
+host-side state machine 问题 [6][7][9][10][15][29]。</p>
+<h2
+id="五分论之三moe-为什么会把-host-side-orchestration-推到前台">五、分论之三：MoE
+为什么会把 host-side orchestration 推到前台</h2>
+<h3 id="moe-的系统代价不止是通信">5.1 MoE 的系统代价不止是通信</h3>
+<p>MoE 的常见叙事是“总参数大、激活参数小，所以更高效”。但
+现有材料 中的材料更清楚地表明：一旦 expert 总量超出单节点 GPU
+驻留能力，系统问题会迅速浮现 [11][12][28][30]。</p>
+<p>主要压力至少来自三处：</p>
+<ul>
+<li>expert routing<br />
+</li>
+<li>weight residency / prefetch<br />
+</li>
+<li>collective orchestration</li>
+</ul>
+<p>因此，MoE 真正节省的是 GPU 上的密集计算，不是系统编排成本。</p>
+<h3 id="当前主流突破口预测预取与驻留解耦">5.2
+当前主流突破口：预测、预取与驻留解耦</h3>
+<p>Speculating Experts 的核心价值，是把 CPU→GPU
+的权重搬运从同步阻塞路径挪到异步预测路径；文中报告 TPOT 可降低约 14%
+[11]。FluxMoE 则通过 decoupled residency，将逻辑 expert
+身份与物理驻留位置分离，降低系统对“预测完全准确”的依赖 [12]。</p>
+<p>这些工作共同说明：MoE
+推理的关键不只是“算得稀疏”，而是能否在正确的时间把正确的 expert
+放到正确的位置。这个问题本质上是 host-side orchestration 问题。</p>
+<p><img src="assets/nvidia-wide-ep-moe-2025.webp" alt="Wide expert parallelism 在机架级系统中的组织方式" width="760"></p>
+<p><strong>图7</strong> 宽专家并行拓扑。该图反映出 MoE
+的性能瓶颈已经扩展到 expert 路由、放置与跨设备通信，因此 host
+侧的协调能力直接影响系统吞吐。来源：NVIDIA, 2025 [28]。</p>
+<h3 id="agentic-workload-下moe-压力会与-kv-压力叠加">5.3 Agentic
+workload 下，MoE 压力会与 KV 压力叠加</h3>
+<p>在 agentic inference 中，同一个系统往往同时面对：</p>
+<ul>
+<li>多上下文长期保留<br />
+</li>
+<li>高频恢复<br />
+</li>
+<li>子代理并发<br />
+</li>
+<li>稀疏专家访问</li>
+</ul>
+<p>这意味着 KV 生命周期管理与 expert residency 很可能共享同一套 host
+侧预算。也就是说，MoE 在 agentic inference
+里的意义，不是单独增加一个问题，而是把原本已经存在的 host
+压力继续叠加：一边是状态对象的保留与恢复，另一边是稀疏专家的放置与预取，两者都会竞争
+host memory、传输窗口和调度队列 [9][11][12][28]。</p>
+<p>小结：MoE 不是“GPU 算得更少，系统自然更轻”，而是“GPU
+变稀疏之后，host-side orchestration 更容易成为上限”。</p>
+<p><img src="assets/extracted/spec-experts-01.png" alt="Speculating Experts 论文中的专家预测与预取示意图" width="760"></p>
+<p><strong>图8</strong> MoE 专家预测与预取机制示意图。该类图说明 MoE
+推理的关键优化正在把同步搬运改成预测驱动的异步预取，CPU
+因而需要更稳定地承担路由、搬运与调度三重职责。来源：Speculating Experts
+论文图页 [11]。</p>
+<h3 id="从-moe-论文可以抽出的三层-host-任务">5.4 从 MoE
+论文可以抽出的三层 host 任务</h3>
+<p>沿着 Speculating Experts、FluxMoE、wide expert parallelism
+这条线，机头 CPU 在 MoE 中的任务可以被拆成三层：</p>
+<ol type="1">
+<li><code>logical routing</code>：决定 token 应送往哪些 expert。<br />
+</li>
+<li><code>physical residency</code>：决定 expert
+现在住在哪里，下一步该住在哪里。<br />
+</li>
+<li><code>transfer scheduling</code>：决定何时搬运、如何与计算重叠、如何避免
+all-to-all 的同步放大。</li>
+</ol>
+<p>这三层任务都不是单个 GPU kernel 能独立完成的，因此 MoE 越成功，host
+orchestration 的价值越高 [11][12][28][30]。</p>
+<h2
+id="六分论之四真实-agentic-workload-补出了哪些传统-serving-论文缺口">六、分论之四：真实
+agentic workload 补出了哪些传统 serving 论文缺口</h2>
+<h3 id="真实系统不再符合单上下文长-decode平滑批次的理想模型">6.1
+真实系统不再符合“单上下文、长 decode、平滑批次”的理想模型</h3>
+<p>现有材料 中引入 Claude Code subagents、Kimi Agent
+Swarm、OpenClaw、Mobile Use Agent
+的价值，不在于把产品介绍塞进综述，而在于它们帮助识别了真实 agentic
+workload 的几个稳定特征 [24][25][26][27]：</p>
+<ul>
+<li>高频 prefill<br />
+</li>
+<li>多会话并存<br />
+</li>
+<li>极宽 fan-out/fan-in<br />
+</li>
+<li>多模态 ingress</li>
+</ul>
+<p>这些特征并不直接告诉我们底层实现细节，但足以说明：真实系统已经偏离了传统
+serving 优化默认采用的负载模型。</p>
+<p><img src="assets/vllm-disagg-prefill-overview.jpg" alt="Prefill-decode 解耦视角下的请求阶段与状态流转" width="760"></p>
+<p><strong>图9</strong> Prefill-decode
+解耦视角下的请求阶段与状态流转。该图本身来自 serving 系统视角，但与
+subagents、swarm、mobile agent 等产品形态结合后，可以更直观看到为何真实
+agentic workload 会放大高频
+prefill、多会话并存和状态恢复压力。来源：vLLM 路线图与解耦 serving 资料
+[5][22]；工作负载解释参考 [24][26][27]。</p>
+<h3 id="四个最值得保留的-workload-纠偏">6.2 四个最值得保留的 workload
+纠偏</h3>
+<h4 id="观点-aprefill-first-比想象中更重要">观点
+A：<code>prefill-first</code> 比想象中更重要</h4>
+<p>GUI agent、mobile agent 和多轮代码 agent
+会不断把新的观察、状态或中间结果重新送入模型。这意味着 host
+侧不应只按“长 decode”设计，而必须对高频 prefill 更敏感
+[22][24][27]。</p>
+<h4 id="观点-bsession-multiplicity-比单条长上下文更难">观点
+B：<code>session multiplicity</code> 比单条长上下文更难</h4>
+<p>Claude Code subagents 和 Kimi Swarm
+共同指向的是：问题不只是“一个上下文很长”，而是“同时活跃的上下文太多”。这会直接抬高
+per-session queue、admission control 和 placement policy 的复杂度
+[24][26]。</p>
+<h4 id="观点-cfan-outfan-in-burst-会制造瞬时宽并发">观点
+C：<code>fan-out/fan-in burst</code> 会制造瞬时宽并发</h4>
+<p>多代理系统的压力点并不总在平均
+QPS，而往往出现在某一轮任务分解后的并发爆发，再在汇聚阶段形成二次瓶颈。这对
+host 侧 burst handling 和尾延迟控制极为不友好 [26]。</p>
+<h4 id="观点-dmultimodal-ingress-让-host-内存与排队压力上升">观点
+D：<code>multimodal ingress</code> 让 host 内存与排队压力上升</h4>
+<p>即便不把手机操作或工具执行本身算进 CPU
+主结论，视觉输入重新进入推理链路，也会放大
+prefill、状态切换和会话绑定压力 [25][27]。</p>
+<p>小结：真实 agentic workload 让机头 CPU
+的问题从“服务单条请求”演化为“管理异构、可恢复、可分叉的状态集合”。</p>
+<h3 id="把真实-workload-重新翻译成系统语言">6.3 把真实 workload
+重新翻译成系统语言</h3>
+<p>这一章如果继续压缩，可以把几类产品形态翻译成更底层的系统约束：</p>
+<ul>
+<li>Claude Code subagents 对应的是
+<code>session multiplicity</code>。<br />
+</li>
+<li>Kimi Swarm 对应的是
+<code>fan-out / fan-in burst width</code>。<br />
+</li>
+<li>Mobile agent 与 OpenClaw 对应的是
+<code>multimodal prefill churn</code>。<br />
+</li>
+<li>多轮 agent 对应的是 <code>resume-heavy execution</code>。</li>
+</ul>
+<p>这种翻译的意义在于，它把“产品看起来更复杂”变成了“host
+需要管理更多状态机”。因此，真实 workload
+不是补充案例，而是用来修正系统模型的核心证据 [24][25][26][27]。</p>
+<h2
+id="七平台与产品信号为什么说-2026-年是一个转折点">七、平台与产品信号：为什么说
+2026 年是一个转折点</h2>
+<h3 id="vera-rubin-bluefield-4-传递出的不是单点宣传而是架构方向">7.1
+Vera / Rubin / BlueField-4 传递出的不是单点宣传，而是架构方向</h3>
+<p>NVIDIA Vera CPU 相关资料给出的关键信号包括：88 个定制 Arm
+核、<code>1.2 TB/s</code> 的 LPDDR5X 带宽、<code>1.8 TB/s</code> 的
+NVLink-C2C 带宽，以及“AI factory 控制平面”的明确定位
+[13][14][17]。这些参数之所以重要，不只是因为它们高，而是因为它们恰好对应了
+agentic inference 中最吃 host 预算的环节：</p>
+<ul>
+<li>高带宽主机内存，对应 KV warm tier 与高频状态访问。<br />
+</li>
+<li>高速 CPU-GPU 一致性互连，对应恢复路径和近端分层。<br />
+</li>
+<li>与 GPU/DPU/交换的系统级耦合，对应跨池编排与传输协调。</li>
+</ul>
+<p><img src="assets/nvidia-vera-cpu-architecture.png" alt="NVIDIA Vera CPU 架构与关键规格" width="760"></p>
+<p><strong>图10</strong> Vera CPU 架构与关键规格。高内存带宽和高 CPU-GPU
+互连带宽说明其设计目标并非传统通用服务器 CPU，而是更接近 AI factory
+控制平面处理器。来源：NVIDIA, 2026 [13]。</p>
+<h3 id="一体化平台说明cpu-控制平面假设已经下沉到系统设计">7.2
+一体化平台说明“CPU 控制平面”假设已经下沉到系统设计</h3>
+<p>Rubin、NVLink Switch、BlueField-4
+与网络交换的一体化平台表明，平台设计已经不再把 CPU、GPU、DPU
+看成松耦合部件，而是按一个完整的推理系统来组织 [14][22][28]。</p>
+<p><img src="assets/nvidia-vera-rubin-6chips.png" alt="Vera Rubin 六芯片协同平台" width="760"></p>
+<p><strong>图11</strong> Vera、Rubin、BlueField-4
+与交换组件的协同平台。该图说明机头 CPU
+的位置已前移为整个平台的控制平面，而非传统意义上的外围
+host。来源：StorageReview, 2026 [14]。</p>
+<h3 id="cpugpu-配比变化是系统需求变化的外在表现">7.3 CPU:GPU
+配比变化是系统需求变化的外在表现</h3>
+<p>TrendForce 以及多份产业评论都判断，AI 数据中心的 CPU:GPU
+配比正在从传统的 <code>1:4–1:8</code> 向 <code>1:1–1:2</code> 演进
+[16][18][19][20][21]。即便这些数字需要继续验证，它们至少说明产业已经在按“更多
+CPU 预算是合理的”来规划未来部署。</p>
+<p>小结：平台路线图并非对论文结论的简单附会，而是在硬件组织方式上确认了
+host orchestration 的价值正在上升。</p>
+<h3 id="平台层的真正变化不是cpu-更强而是cpu-更靠前">7.4
+平台层的真正变化不是“CPU 更强”，而是“CPU 更靠前”</h3>
+<p>把 Vera、Rubin、BlueField-4、CXL
+这些信号放在一起，最值得注意的不是单个参数，而是职责位置的变化：</p>
+<ul>
+<li>CPU 更靠近 memory tiering。<br />
+</li>
+<li>CPU 更靠近 GPU 协调。<br />
+</li>
+<li>DPU / SuperNIC 更主动替 CPU 卸下数据面任务。<br />
+</li>
+<li>平台开始默认控制平面值得被单独设计。</li>
+</ul>
+<p>这说明 host CPU 的问题已经不是“传统服务器 CPU
+能不能顺便做一点推理工作”，而是“AI inference control plane
+应该长什么样”。这也是为什么平台讨论必须成为综述正文的一部分，而不能只放在附录里
+[13][14][15][16][17][22][28]。</p>
+<h2
+id="八选型与部署怎样把综述结论落成工程决策">八、选型与部署：怎样把综述结论落成工程决策</h2>
+<h3 id="机头-cpu-不应只按品牌代际选而应按节点角色选">8.1 机头 CPU
+不应只按“品牌/代际”选，而应按节点角色选</h3>
+<p>从前文四条主线可以看出，同样是“机头
+CPU”，不同部署角色的关注点其实不同：</p>
+<ol type="1">
+<li><code>co-located GPU node</code>：更看重近端一致性互连、主机内存带宽与恢复路径延迟。<br />
+</li>
+<li><code>prefill-heavy ingress node</code>：更看重高频 prefill
+下的调度稳定性、tokenization 与输入处理能力。<br />
+</li>
+<li><code>capacity-oriented state node</code>：更看重大容量 host
+memory、CXL 挂接与分层成本。<br />
+</li>
+<li><code>coordination-heavy swarm node</code>：更看重多会话调度、burst
+handling 与尾延迟隔离。</li>
+</ol>
+<p>这也是为什么本文一直强调，agentic inference 中的 CPU
+选型不应再被理解为“给 GPU 配一颗合适的 host
+CPU”，而应被理解为“给不同节点角色配置不同控制平面预算”
+[10][15][16][22][23]。</p>
+<h3 id="一个实用的部署分层框架">8.2 一个实用的部署分层框架</h3>
+<p>如果把现有材料压成工程语言，可以得到一个相对稳健的部署分层框架：</p>
+<ul>
+<li><code>热层</code>：GPU HBM，承载当前 step
+必须参与计算的状态与权重。<br />
+</li>
+<li><code>温层</code>：coherent CPU memory / host
+DRAM，承载高概率恢复对象、近端 overflow 与快速复用状态。<br />
+</li>
+<li><code>暖层扩展</code>：CXL
+memory，承载容量优先但仍要求可控恢复延迟的对象。<br />
+</li>
+<li><code>冷层</code>：local / remote
+storage，承载低热度状态与更远期恢复对象。</li>
+</ul>
+<p><img src="assets/agentic-kv-memory-hierarchy.svg" alt="Agentic inference 的 KV / 状态分层内存示意图" width="760"></p>
+<p><strong>图12</strong> Agentic inference 的状态分层内存示意图。该图将
+HBM、CPU memory、CXL
+和更远层存储放在同一个层次视图里，更适合用来解释部署侧的 tiering
+决策。来源：本目录整理图，依据 KV offload、coherent memory 与 CXL 资料
+[9][10][15][29]。</p>
+<p>这一分层最直接的意义，是把“CPU
+配置”从单一算力参数改写成一组系统参数：</p>
+<ul>
+<li>host memory 带宽够不够支撑 warm-tier 命中<br />
+</li>
+<li>CXL 扩展是否真的降低总成本<br />
+</li>
+<li>恢复路径是否会把尾延迟推高到不可接受<br />
+</li>
+<li>不同层之间的 demote / prefetch / resume 是否能被稳定编排</li>
+</ul>
+<h3 id="dpu-supernic-的意义在于给-cpu-让路">8.3 DPU / SuperNIC
+的意义在于给 CPU 让路</h3>
+<p>BlueField-4 这类组件在本文中的意义，不是单独讨论 NIC 或
+DPU，而是说明：当网络、存储和安全路径可以被旁路时，机头 CPU
+就能把更多预算留给推理控制面 [14][22]。</p>
+<p><img src="assets/nvidia-bluefield4.png" alt="BlueField-4 DPU 与网络卸载架构" width="760"></p>
+<p><strong>图13</strong> BlueField-4 DPU
+与网络/存储卸载架构。该图的关键不是 DPU
+自身，而是它说明平台开始主动把数据面职责从 CPU
+上拿走，从而给推理控制链路让出预算。来源：StorageReview / NVIDIA
+平台资料 [14][22]。</p>
+<h3 id="一个面向-agentic-inference-的-cpu-选型检查表">8.4 一个面向
+agentic inference 的 CPU 选型检查表</h3>
+<p>对于真正的工程部署，CPU 选型至少应回答以下问题：</p>
+<ul>
+<li>是否主要面对 <code>prefill-heavy</code>、<code>resume-heavy</code>
+还是 <code>decode-heavy</code> 负载？<br />
+</li>
+<li>是否需要把 host memory 当作 warm tier，而不是仅仅当作 spill
+层？<br />
+</li>
+<li>是否存在大量 <code>session multiplicity</code> 或
+<code>fan-out/fan-in burst</code>？<br />
+</li>
+<li>是否需要与 CXL、DPU、远端存储组成多层状态系统？<br />
+</li>
+<li>是否要求严格控制恢复路径和跨池传输的尾延迟？</li>
+</ul>
+<p>如果这些问题里大多数回答都是“是”，那么该节点对 CPU
+的需求就不应再按传统 serving 假设来配置，而应按 orchestration node
+来配置 [2][9][10][15][22][23]。</p>
+<h2 id="九benchmark-与研究空白下一步到底该怎么测">九、Benchmark
+与研究空白：下一步到底该怎么测</h2>
+<h3 id="现有-benchmark-为什么不够">9.1 现有 benchmark 为什么不够</h3>
+<p>当前公开材料已经足以说明 CPU 重要，但仍缺一个被普遍接受的
+<code>agentic inference host benchmark</code>。原因并不复杂：传统
+benchmark 大多只覆盖吞吐、TPOT、TTFT
+或显存占用，却很少把以下因素放进同一个测量框架：</p>
+<ul>
+<li>高频 prefill<br />
+</li>
+<li>session multiplicity<br />
+</li>
+<li>fan-out / fan-in burst<br />
+</li>
+<li>KV lifecycle efficiency<br />
+</li>
+<li>MoE residency / prefetch quality<br />
+</li>
+<li>multimodal ingress sensitivity</li>
+</ul>
+<p>因此，很多系统虽然在单请求或稳定 batch 上表现良好，却未必能在真实
+agentic workload 下保持低抖动 [2][9][24][26][27]。</p>
+<h3 id="一个更合理的-host-benchmark-应至少覆盖五类指标">9.2 一个更合理的
+host benchmark 应至少覆盖五类指标</h3>
+<p>如果要设计一套面向机头 CPU 的
+benchmark，本文认为至少要覆盖五类指标：</p>
+<ol type="1">
+<li><code>dispatch latency</code>：从请求进入到 GPU 有效开算之间的 host
+延迟。<br />
+</li>
+<li><code>resume latency</code>：状态对象从 warm/cold tier
+恢复回计算路径的延迟。<br />
+</li>
+<li><code>session concurrency quality</code>：多会话并存时的公平性与尾延迟。<br />
+</li>
+<li><code>burst robustness</code>：fan-out / fan-in
+宽并发下的退化曲线。<br />
+</li>
+<li><code>tiering efficiency</code>：KV / expert / context
+在多层内存中的放置与迁移效率。</li>
+</ol>
+<p>这些指标之所以重要，是因为它们分别对应本文四条主线的实际工程落点：算子下发、KV
+生命周期、MoE orchestration、真实 workload 修正。</p>
+<h3 id="现有研究还有三条明显断层">9.3 现有研究还有三条明显断层</h3>
+<p>即便材料已经相当丰富，仍有三条断层值得单独指出：</p>
+<ul>
+<li><code>产品到机制的断层</code>：真实产品公开的内部指标仍太少，导致很多
+workload 结论只能做形态推断。<br />
+</li>
+<li><code>平台到软件的断层</code>：Vera / Rubin / BlueField-4
+给出了清晰方向，但软件栈与实际部署经验还不够丰富。<br />
+</li>
+<li><code>局部优化到系统目标的断层</code>：许多论文能优化某一段链路，却缺少覆盖整条
+control path 的统一评估框架。</li>
+</ul>
+<h3 id="一个更完整的未来研究议程">9.4 一个更完整的未来研究议程</h3>
+<p>如果把本文归纳出的空白继续往前推，可以得到一个相对清晰的研究议程：</p>
+<ul>
+<li>建立
+<code>agentic inference host benchmark</code>，而不是继续只用传统
+serving 指标。<br />
+</li>
+<li>研究 <code>state-centric scheduling</code>，把 KV / context / expert
+一起视作长期状态系统。<br />
+</li>
+<li>研究 <code>control-plane-aware serving</code>，把 host orchestration
+视作第一等优化目标。<br />
+</li>
+<li>研究 <code>platform-software co-design</code>，让 CPU、GPU、DPU、CXL
+和 transport 栈在同一框架下评估。</li>
+</ul>
+<p>这几条议程之所以重要，是因为 agentic inference
+的核心难题已经不再只是“如何让单次前向传播更快”，而是“如何让一个长期、可恢复、可分叉的推理系统稳定运行”
+[2][9][11][15][22][28]。</p>
+<h2 id="十关键数据与论据总表">十、关键数据与论据总表</h2>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>主题</th>
+<th>关键数据点</th>
+<th>含义</th>
+<th>主要来源</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>算子下发</td>
+<td>301 次 kernel launch、约 750 微秒纯下发税、fusion 后吞吐约提升
+20%</td>
+<td>小模型与量化场景下，host 固定成本会迅速成为上限</td>
+<td>[3]</td>
+</tr>
+<tr class="even">
+<td>CPU 抖动</td>
+<td>dequeue 延迟从 12 ms 恶化到 228 ms，约 19x</td>
+<td>CPU oversubscription 可放大为集群级停顿</td>
+<td>[2]</td>
+</tr>
+<tr class="odd">
+<td>推理引擎优化</td>
+<td>vLLM V1 吞吐相对 V0 最高约 <code>1.7x</code></td>
+<td>大量收益来自减少 CPU 侧调度和 Python 开销</td>
+<td>[5]</td>
+</tr>
+<tr class="even">
+<td>KV 访问模式</td>
+<td>KV read/write ratio <code>11.7x</code></td>
+<td>agentic inference 更像状态恢复问题，而非单纯写入问题</td>
+<td>[9]</td>
+</tr>
+<tr class="odd">
+<td>KV 卸载</td>
+<td>NOSA 最高 <code>5.04x</code> 解码吞吐提升</td>
+<td>减少 CPU-GPU KV 传输量是核心收益来源</td>
+<td>[6]</td>
+</tr>
+<tr class="even">
+<td>协同式卸载</td>
+<td>ScoutAttention 约 <code>2.1x</code> 加速，精度损失 &lt; 2.4%</td>
+<td>CPU 可以从搬运者变成协同计算者</td>
+<td>[7]</td>
+</tr>
+<tr class="odd">
+<td>CXL 分层</td>
+<td>GPU 需求下降 87%，GPU 利用率提升 75%，CPU 利用率下降 40%</td>
+<td>KV 分层已经进入容量-性能-成本联合优化阶段</td>
+<td>[15]</td>
+</tr>
+<tr class="even">
+<td>MoE 预取</td>
+<td>TPOT 下降约 14%</td>
+<td>expert 预取能把同步搬运改成异步路径</td>
+<td>[11]</td>
+</tr>
+<tr class="odd">
+<td>平台规格</td>
+<td>Vera 内存带宽 <code>1.2 TB/s</code>，NVLink-C2C
+<code>1.8 TB/s</code></td>
+<td>平台已按 CPU 控制平面需求组织</td>
+<td>[13]</td>
+</tr>
+<tr class="even">
+<td>产业配比</td>
+<td>CPU:GPU 由 <code>1:4–1:8</code> 向 <code>1:1–1:2</code> 演进</td>
+<td>部署预算开始显式向 host 侧回流</td>
+<td>[16]</td>
+</tr>
+</tbody>
+</table>
+<h2
+id="十一讨论这份综述目前最强和最弱的地方分别是什么">十一、讨论：这份综述目前最强和最弱的地方分别是什么</h2>
+<h3 id="最强的部分">11.1 最强的部分</h3>
+<p>这批材料最强的地方，是四条证据链能够相互印证：</p>
+<ul>
+<li>机制论文解释了为什么 host 侧会成为瓶颈 [2][6][7][11][12]。<br />
+</li>
+<li>厂商系统文档解释了这些瓶颈在生产栈中如何出现
+[9][10][22][23][28]。<br />
+</li>
+<li>产品 workload 解释了为什么传统 serving 假设会失效
+[24][25][26][27]。<br />
+</li>
+<li>平台路线图解释了为什么硬件开始围绕这一判断收敛
+[13][14][15][16][17]。</li>
+</ul>
+<h3 id="仍然缺失的部分">11.2 仍然缺失的部分</h3>
+<p>但仍有三类缺口没有真正闭合：</p>
+<ol type="1">
+<li>缺少统一的 <code>agentic inference host benchmark</code>。<br />
+</li>
+<li>真实产品形态与底层机制之间，仍存在一层推断。<br />
+</li>
+<li>Vera / Rubin / CXL
+等平台信号很强，但长期普及度和跨平台可迁移性仍需更多独立部署证据。</li>
+</ol>
+<h2
+id="十二总结如何理解机头-cpu-在-agentic-inference-中的新位置">十二、总结：如何理解机头
+CPU 在 agentic inference 中的新位置</h2>
+<p>把 现有材料 中的所有内容压成一句话，最准确的表达不是“CPU
+又重要了”，而是：</p>
+<p><strong>agentic AI 推理正在把原本隐藏在 host
+侧的调度、状态、传输和编排链路重新暴露出来，而机头 CPU
+就是这条链路的第一执行者。</strong></p>
+<p>因此，机头 CPU 在 agentic inference 中的角色不应再被理解为“GPU
+旁边那颗普通服务器 CPU”，而应被理解为：</p>
+<p><strong>推理系统的 orchestration layer in silicon。</strong></p>
+<p>对未来系统设计而言，这一判断至少带来三点直接启示：</p>
+<ol type="1">
+<li>不能再只按 CPU
+核心数或主频做选型，而要按节点角色、内存分层与恢复路径来设计
+[10][15][22]。<br />
+</li>
+<li>不能再把 KV 看作显存扩展问题，而要把它当作长期状态系统来处理
+[6][7][9][10]。<br />
+</li>
+<li>不能再把 host 视为背景常量，而应把 host orchestration
+纳入一等公民级别的建模、测量与优化 [2][9][11][22][28]。</li>
+</ol>
+<h2 id="参考文献">参考文献</h2>
+<p>[1] RAJ R, et al. Towards understanding, analyzing, and optimizing
+agentic AI execution: a CPU-centric perspective[EB/OL].
+arXiv:2511.00739, 2025[2026-04-24].
+https://arxiv.org/abs/2511.00739.</p>
+<p>[2] Characterizing CPU-induced slowdowns in multi-GPU LLM
+inference[EB/OL]. arXiv:2603.22774, 2026[2026-04-24].
+https://arxiv.org/abs/2603.22774.</p>
+<p>[3] What actually bottlenecks LLM inference on modern GPUs[EB/OL].
+AI.rs, 2026[2026-04-24].
+https://ai.rs/ai-developer/memory-wall-disappears-llm-inference-bottlenecks.</p>
+<p>[4] Event Tensor: dynamic megakernels for LLM serving[EB/OL].
+arXiv:2604.13327, 2026[2026-04-24].
+https://arxiv.org/abs/2604.13327.</p>
+<p>[5] vLLM Project. vLLM V1 alpha release and subsequent public roadmap
+materials[EB/OL]. 2025-2026.</p>
+<p>[6] HUANG Y, et al. NOSA: native and offloadable sparse
+attention[EB/OL]. arXiv:2510.13602, 2025[2026-04-24].
+https://arxiv.org/abs/2510.13602.</p>
+<p>[7] ZHANG Q, et al. ScoutAttention: efficient KV cache offloading via
+layer-ahead CPU pre-computation[EB/OL]. arXiv:2603.27138,
+2026[2026-04-24]. https://arxiv.org/abs/2603.27138.</p>
+<p>[8] CoMEM: a decoupled agent framework with asynchronous memory
+compression[EB/OL]. OpenReview, 2025[2026-04-24].
+https://openreview.net/pdf?id=c7c6541f58ddaf647289d2523a9587312294301a.</p>
+<p>[9] NVIDIA. Full-stack optimizations for agentic inference with
+NVIDIA Dynamo[EB/OL]. 2026[2026-04-24].
+https://developer.nvidia.com/blog/full-stack-optimizations-for-agentic-inference-with-nvidia-dynamo/.</p>
+<p>[10] NVIDIA. Accelerate large-scale LLM inference and KV cache
+offload with CPU-GPU memory sharing[EB/OL]. 2025[2026-04-24].
+https://developer.nvidia.com/blog/accelerate-large-scale-llm-inference-and-kv-cache-offload-with-cpu-gpu-memory-sharing/.</p>
+<p>[11] Speculating experts accelerates inference for
+mixture-of-experts[EB/OL]. arXiv:2603.19289, 2026[2026-04-24].
+https://arxiv.org/abs/2603.19289.</p>
+<p>[12] FluxMoE: decoupling expert residency for high-performance MoE
+serving[EB/OL]. arXiv:2604.02715, 2026[2026-04-24].
+https://arxiv.org/abs/2604.02715.</p>
+<p>[13] NVIDIA. NVIDIA Vera CPU delivers high performance, bandwidth,
+and efficiency for AI factories[EB/OL]. 2026[2026-04-24].
+https://developer.nvidia.com/blog/nvidia-vera-cpu-delivers-high-performance-bandwidth-and-efficiency-for-ai-factories/.</p>
+<p>[14] StorageReview. NVIDIA launches Vera Rubin architecture at CES
+2026[EB/OL]. 2026[2026-04-24].
+https://www.storagereview.com/news/nvidia-launches-vera-rubin-architecture-at-ces-2026-the-vr-nvl72-rack.</p>
+<p>[15] Astera Labs. How CXL transforms RAG and KV cache
+performance[EB/OL]. 2025[2026-04-24].
+https://www.asteralabs.com/breaking-through-the-memory-wall-how-cxl-transforms-rag-and-kv-cache-performance/.</p>
+<p>[16] TrendForce. How agentic AI is reshaping the CPU:GPU
+ratio[EB/OL]. 2026[2026-04-24].
+https://insights.trendforce.com/p/agentic-ai-cpu-gpu.</p>
+<p>[17] Data Center Dynamics. NVIDIA Vera CPU enters full production,
+pitched at agentic AI workloads[EB/OL]. 2026[2026-04-24].
+https://www.datacenterdynamics.com/en/news/nvidia-vera-cpu-enters-full-production-pitched-at-agentic-ai-workloads/.</p>
+<p>[18] The Diligence Stack. Secret agent CPU[EB/OL]. 2026[2026-04-24].
+https://thediligencestack.com/p/secret-agent-cpu.</p>
+<p>[19] rmmod. In the age of agentic, the CPU is the new
+bottleneck[EB/OL]. 2026[2026-04-24].
+https://rmmod.com/posts/agent/agentic-cpu-bottleneck/.</p>
+<p>[20] Uncover Alpha. The forgotten chip: CPUs the new bottleneck of
+the agentic AI era[EB/OL]. 2026[2026-04-24].
+https://www.uncoveralpha.com/p/the-forgotten-chip-cpus-the-new-bottleneck.</p>
+<p>[21] Zylos Research. AI inference optimization techniques
+(2025-2026)[EB/OL]. 2026[2026-04-24].
+https://zylos.ai/research/2026-01-11-ai-inference-optimization.</p>
+<p>[22] NVIDIA. Deploying disaggregated LLM inference workloads on
+Kubernetes[EB/OL]. 2026[2026-04-24].
+https://developer.nvidia.com/blog/deploying-disaggregated-llm-inference-workloads-on-kubernetes/.</p>
+<p>[23] NVIDIA. Enhancing distributed inference performance with the
+NVIDIA inference transfer library[EB/OL]. 2026[2026-04-24].
+https://developer.nvidia.com/blog/enhancing-distributed-inference-performance-with-the-nvidia-inference-transfer-library/.</p>
+<p>[24] Anthropic. Subagents[EB/OL]. Claude Code
+Documentation[2026-04-24].
+https://docs.anthropic.com/en/docs/claude-code/sub-agents.</p>
+<p>[25] OpenClaw. openclaw/openclaw README[EB/OL]. [2026-04-24].
+https://github.com/openclaw/openclaw.</p>
+<p>[26] Kimi. Kimi introduces Agent Swarm: let 100 AI agents work for
+you[EB/OL]. 2026[2026-04-24].
+https://www.kimi.com/blog/agent-swarm.html.</p>
+<p>[27] 火山引擎. 不止对话，更能执行！火山引擎 Mobile Use Agent
+全新升级，解锁企业级移动 AI 执行力[EB/OL]. 2026[2026-04-24].
+https://developer.volcengine.com/articles/7628489608359395369.</p>
+<p>[28] NVIDIA. Scaling large MoE models with wide expert parallelism on
+NVL72 rack-scale systems[EB/OL]. 2025[2026-04-24].
+https://developer.nvidia.com/blog/scaling-large-moe-models-with-wide-expert-parallelism-on-nvl72-rack-scale-systems/.</p>
+<p>[29] NetApp. KV cache offloading — CPU RAM vs. storage[EB/OL].
+2025[2026-04-24].
+https://community.netapp.com/t5/Tech-ONTAP-Blogs/KV-cache-offloading-CPU-RAM-vs-storage/ba-p/464463.</p>
+<p>[30] PatSnap. MoE inference cost cuts: 30+ patents analyzed[EB/OL].
+2026[2026-04-24].
+https://www.patsnap.com/resources/blog/articles/moe-inference-cost-cuts-30-patents-analyzed/.</p>
+</body>
+</html>

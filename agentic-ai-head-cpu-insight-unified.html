@@ -1,0 +1,802 @@
+<!DOCTYPE html><html><head>
+      <title>agentic-ai-head-cpu-insight-unified</title>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      
+      <link rel="stylesheet" href="file:////home/hugulas/.vscode/extensions/shd101wyy.markdown-preview-enhanced-0.8.24/crossnote/dependencies/katex/katex.min.css">
+      
+      
+      
+      
+      
+      
+      
+      <style>
+      code[class*=language-],pre[class*=language-]{color:#333;background:0 0;font-family:Consolas,"Liberation Mono",Menlo,Courier,monospace;text-align:left;white-space:pre;word-spacing:normal;word-break:normal;word-wrap:normal;line-height:1.4;-moz-tab-size:8;-o-tab-size:8;tab-size:8;-webkit-hyphens:none;-moz-hyphens:none;-ms-hyphens:none;hyphens:none}pre[class*=language-]{padding:.8em;overflow:auto;border-radius:3px;background:#f5f5f5}:not(pre)>code[class*=language-]{padding:.1em;border-radius:.3em;white-space:normal;background:#f5f5f5}.token.blockquote,.token.comment{color:#969896}.token.cdata{color:#183691}.token.doctype,.token.macro.property,.token.punctuation,.token.variable{color:#333}.token.builtin,.token.important,.token.keyword,.token.operator,.token.rule{color:#a71d5d}.token.attr-value,.token.regex,.token.string,.token.url{color:#183691}.token.atrule,.token.boolean,.token.code,.token.command,.token.constant,.token.entity,.token.number,.token.property,.token.symbol{color:#0086b3}.token.prolog,.token.selector,.token.tag{color:#63a35c}.token.attr-name,.token.class,.token.class-name,.token.function,.token.id,.token.namespace,.token.pseudo-class,.token.pseudo-element,.token.url-reference .token.variable{color:#795da3}.token.entity{cursor:help}.token.title,.token.title .token.punctuation{font-weight:700;color:#1d3e81}.token.list{color:#ed6a43}.token.inserted{background-color:#eaffea;color:#55a532}.token.deleted{background-color:#ffecec;color:#bd2c00}.token.bold{font-weight:700}.token.italic{font-style:italic}.language-json .token.property{color:#183691}.language-markup .token.tag .token.punctuation{color:#333}.language-css .token.function,code.language-css{color:#0086b3}.language-yaml .token.atrule{color:#63a35c}code.language-yaml{color:#183691}.language-ruby .token.function{color:#333}.language-markdown .token.url{color:#795da3}.language-makefile .token.symbol{color:#795da3}.language-makefile .token.variable{color:#183691}.language-makefile .token.builtin{color:#0086b3}.language-bash .token.keyword{color:#0086b3}pre[data-line]{position:relative;padding:1em 0 1em 3em}pre[data-line] .line-highlight-wrapper{position:absolute;top:0;left:0;background-color:transparent;display:block;width:100%}pre[data-line] .line-highlight{position:absolute;left:0;right:0;padding:inherit 0;margin-top:1em;background:hsla(24,20%,50%,.08);background:linear-gradient(to right,hsla(24,20%,50%,.1) 70%,hsla(24,20%,50%,0));pointer-events:none;line-height:inherit;white-space:pre}pre[data-line] .line-highlight:before,pre[data-line] .line-highlight[data-end]:after{content:attr(data-start);position:absolute;top:.4em;left:.6em;min-width:1em;padding:0 .5em;background-color:hsla(24,20%,50%,.4);color:#f4f1ef;font:bold 65%/1.5 sans-serif;text-align:center;vertical-align:.3em;border-radius:999px;text-shadow:none;box-shadow:0 1px #fff}pre[data-line] .line-highlight[data-end]:after{content:attr(data-end);top:auto;bottom:.4em}html body{font-family:'Helvetica Neue',Helvetica,'Segoe UI',Arial,freesans,sans-serif;font-size:16px;line-height:1.6;color:#333;background-color:#fff;overflow:initial;box-sizing:border-box;word-wrap:break-word}html body>:first-child{margin-top:0}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{line-height:1.2;margin-top:1em;margin-bottom:16px;color:#000}html body h1{font-size:2.25em;font-weight:300;padding-bottom:.3em}html body h2{font-size:1.75em;font-weight:400;padding-bottom:.3em}html body h3{font-size:1.5em;font-weight:500}html body h4{font-size:1.25em;font-weight:600}html body h5{font-size:1.1em;font-weight:600}html body h6{font-size:1em;font-weight:600}html body h1,html body h2,html body h3,html body h4,html body h5{font-weight:600}html body h5{font-size:1em}html body h6{color:#5c5c5c}html body strong{color:#000}html body del{color:#5c5c5c}html body a:not([href]){color:inherit;text-decoration:none}html body a{color:#08c;text-decoration:none}html body a:hover{color:#00a3f5;text-decoration:none}html body img{max-width:100%}html body>p{margin-top:0;margin-bottom:16px;word-wrap:break-word}html body>ol,html body>ul{margin-bottom:16px}html body ol,html body ul{padding-left:2em}html body ol.no-list,html body ul.no-list{padding:0;list-style-type:none}html body ol ol,html body ol ul,html body ul ol,html body ul ul{margin-top:0;margin-bottom:0}html body li{margin-bottom:0}html body li.task-list-item{list-style:none}html body li>p{margin-top:0;margin-bottom:0}html body .task-list-item-checkbox{margin:0 .2em .25em -1.8em;vertical-align:middle}html body .task-list-item-checkbox:hover{cursor:pointer}html body blockquote{margin:16px 0;font-size:inherit;padding:0 15px;color:#5c5c5c;background-color:#f0f0f0;border-left:4px solid #d6d6d6}html body blockquote>:first-child{margin-top:0}html body blockquote>:last-child{margin-bottom:0}html body hr{height:4px;margin:32px 0;background-color:#d6d6d6;border:0 none}html body table{margin:10px 0 15px 0;border-collapse:collapse;border-spacing:0;display:block;width:100%;overflow:auto;word-break:normal;word-break:keep-all}html body table th{font-weight:700;color:#000}html body table td,html body table th{border:1px solid #d6d6d6;padding:6px 13px}html body dl{padding:0}html body dl dt{padding:0;margin-top:16px;font-size:1em;font-style:italic;font-weight:700}html body dl dd{padding:0 16px;margin-bottom:16px}html body code{font-family:Menlo,Monaco,Consolas,'Courier New',monospace;font-size:.85em;color:#000;background-color:#f0f0f0;border-radius:3px;padding:.2em 0}html body code::after,html body code::before{letter-spacing:-.2em;content:'\00a0'}html body pre>code{padding:0;margin:0;word-break:normal;white-space:pre;background:0 0;border:0}html body .highlight{margin-bottom:16px}html body .highlight pre,html body pre{padding:1em;overflow:auto;line-height:1.45;border:#d6d6d6;border-radius:3px}html body .highlight pre{margin-bottom:0;word-break:normal}html body pre code,html body pre tt{display:inline;max-width:initial;padding:0;margin:0;overflow:initial;line-height:inherit;word-wrap:normal;background-color:transparent;border:0}html body pre code:after,html body pre code:before,html body pre tt:after,html body pre tt:before{content:normal}html body blockquote,html body dl,html body ol,html body p,html body pre,html body ul{margin-top:0;margin-bottom:16px}html body kbd{color:#000;border:1px solid #d6d6d6;border-bottom:2px solid #c7c7c7;padding:2px 4px;background-color:#f0f0f0;border-radius:3px}@media print{html body{background-color:#fff}html body h1,html body h2,html body h3,html body h4,html body h5,html body h6{color:#000;page-break-after:avoid}html body blockquote{color:#5c5c5c}html body pre{page-break-inside:avoid}html body table{display:table}html body img{display:block;max-width:100%;max-height:100%}html body code,html body pre{word-wrap:break-word;white-space:pre}}.markdown-preview{width:100%;height:100%;box-sizing:border-box}.markdown-preview ul{list-style:disc}.markdown-preview ul ul{list-style:circle}.markdown-preview ul ul ul{list-style:square}.markdown-preview ol{list-style:decimal}.markdown-preview ol ol,.markdown-preview ul ol{list-style-type:lower-roman}.markdown-preview ol ol ol,.markdown-preview ol ul ol,.markdown-preview ul ol ol,.markdown-preview ul ul ol{list-style-type:lower-alpha}.markdown-preview .newpage,.markdown-preview .pagebreak{page-break-before:always}.markdown-preview pre.line-numbers{position:relative;padding-left:3.8em;counter-reset:linenumber}.markdown-preview pre.line-numbers>code{position:relative}.markdown-preview pre.line-numbers .line-numbers-rows{position:absolute;pointer-events:none;top:1em;font-size:100%;left:0;width:3em;letter-spacing:-1px;border-right:1px solid #999;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none}.markdown-preview pre.line-numbers .line-numbers-rows>span{pointer-events:none;display:block;counter-increment:linenumber}.markdown-preview pre.line-numbers .line-numbers-rows>span:before{content:counter(linenumber);color:#999;display:block;padding-right:.8em;text-align:right}.markdown-preview .mathjax-exps .MathJax_Display{text-align:center!important}.markdown-preview:not([data-for=preview]) .code-chunk .code-chunk-btn-group{display:none}.markdown-preview:not([data-for=preview]) .code-chunk .status{display:none}.markdown-preview:not([data-for=preview]) .code-chunk .output-div{margin-bottom:16px}.markdown-preview .md-toc{padding:0}.markdown-preview .md-toc .md-toc-details{margin:0;padding:0;border:none}.markdown-preview .md-toc summary.md-toc-link-wrapper{cursor:pointer;list-style-position:outside}.markdown-preview .md-toc summary.md-toc-link-wrapper::marker{font-size:.85em}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link div,.markdown-preview .md-toc .md-toc-link-wrapper .md-toc-link p{display:inline}.markdown-preview .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='0']{margin-left:12px}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='1']{margin-left:28px}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='2']{margin-left:44px}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='3']{margin-left:60px}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='4']{margin-left:76px}.markdown-preview .md-toc .md-toc-link-wrapper[data-level='5']{margin-left:80px}.scrollbar-style::-webkit-scrollbar{width:8px}.scrollbar-style::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}.scrollbar-style::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,.66);border:4px solid rgba(150,150,150,.66);background-clip:content-box}html body[for=html-export]:not([data-presentation-mode]){position:relative;width:100%;height:100%;top:0;left:0;margin:0;padding:0;overflow:auto}html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{position:relative;top:0;min-height:100vh}@media screen and (min-width:914px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{padding:2em calc(50% - 457px + 2em)}}@media screen and (max-width:914px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for=html-export]:not([data-presentation-mode]) .markdown-preview{font-size:14px!important;padding:1em}}@media print{html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn{display:none}}html body[for=html-export]:not([data-presentation-mode]) #sidebar-toc-btn{position:fixed;bottom:8px;left:8px;font-size:28px;cursor:pointer;color:inherit;z-index:99;width:32px;text-align:center;opacity:.4}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] #sidebar-toc-btn{opacity:1}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc{position:fixed;top:0;left:0;width:300px;height:100%;padding:32px 0 48px 0;font-size:14px;box-shadow:0 0 4px rgba(150,150,150,.33);box-sizing:border-box;overflow:auto;background-color:inherit}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar{width:8px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-track{border-radius:10px;background-color:transparent}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc::-webkit-scrollbar-thumb{border-radius:5px;background-color:rgba(150,150,150,.66);border:4px solid rgba(150,150,150,.66);background-clip:content-box}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc a{text-decoration:none}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc{padding:0 16px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-details{margin:0;padding:0;border:none}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link{display:inline;padding:.25rem 0}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link div,html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper .md-toc-link p{display:inline}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper.highlighted .md-toc-link{font-weight:800}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='0']{padding-left:0}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='1']{padding-left:16px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='2']{padding-left:32px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='3']{padding-left:48px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='4']{padding-left:64px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .md-sidebar-toc .md-toc .md-toc-link-wrapper[data-level='5']{padding-left:80px}html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{left:300px;width:calc(100% - 300px);padding:2em calc(50% - 457px - 300px / 2);margin:0;box-sizing:border-box}@media screen and (max-width:1274px){html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{padding:2em}}@media screen and (max-width:450px){html body[for=html-export]:not([data-presentation-mode])[html-show-sidebar-toc] .markdown-preview{width:100%}}html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .markdown-preview{left:50%;transform:translateX(-50%)}html body[for=html-export]:not([data-presentation-mode]):not([html-show-sidebar-toc]) .md-sidebar-toc{display:none}
+/* Please visit the URL below for more information: */
+/*   https://shd101wyy.github.io/markdown-preview-enhanced/#/customize-css */
+
+      </style>
+      <script type="text/javascript">
+  document.addEventListener("DOMContentLoaded", function () {
+    // your code here
+  });
+</script>
+    </head>
+    <body for="html-export">
+      <div class="crossnote markdown-preview  ">
+      
+<h1 id="agentic-ai-推理机头-cpu-洞察算子下发-kv-卸载-moe-与真实工作负载反推">Agentic AI 推理机头 CPU 洞察：算子下发、KV 卸载、MoE 与真实工作负载反推 </h1>
+<blockquote>
+<p><strong>更新日期：</strong> 2026-04-24<br>
+<strong>资料时间边界：</strong> 2025-07-01 及之后公开发布的论文、专利、产品发布与产业分析<br>
+<strong>范围说明：</strong> 本文聚焦 GPU 推理节点上的 host CPU / control-plane CPU（"机头 CPU"），重点关注三类场景：<code>算子下发（route / prefill / decode / transfer dispatch）</code>、<code>KV 卸载</code>、<code>MoE expert dispatch</code>。不讨论 2025 年 7 月之前的旧论文结论，除非仅用于术语解释。</p>
+</blockquote>
+<hr>
+<h2 id="执行摘要">执行摘要 </h2>
+<ul>
+<li><strong>Agentic AI 正将系统瓶颈从 GPU 推向机头 CPU。</strong> Georgia Tech 与 Intel 的联合研究（2025-11）表明，典型 Agentic 工作负载中工具处理占端到端延迟的 <strong>50%–90.6%</strong>；GPU 升级越快，瓶颈越迅速向 CPU 侧转移。</li>
+<li><strong>算子下发（Operator Dispatch）已从"单机 kernel launch"演化为"分离式推理编排"，且权重量化越激进，"调度墙"越明显。</strong> 2026 年多项独立研究显示，在量化小模型或高并发服务场景中，单次前向传播可能发射数百个微秒级 Kernel，每个 Launch 约 2.5 μs 的 CPU 侧驱动开销成为主导延迟；CPU 核心竞争可将该开销从微秒级放大到毫秒级，导致多 GPU 集群产生级联等待。vLLM V1 通过 Persistent Batch、Numpy 替代 Python Native 等重构，将吞吐提升 <strong>1.7×</strong>。</li>
+<li><strong>KV Cache 卸载到主机内存是长上下文推理的必选项，但 CPU-GPU 传输开销决定收益上限。</strong> 2025 下半年至 2026 年的 NOSA、ScoutAttention、CXL 内存扩展方案显示，卸载系统需同时约束跨设备传输量并隐藏延迟；NVIDIA Dynamo 给出的 Agentic 推理 cache hit 可达 <strong>85%–97%</strong>，read/write ratio 高达 <strong>11.7x</strong>，使 KV 管理从"容量问题"升级为"生命周期问题"。CXL 内存层可在生产建模中将 GPU 需求降低 <strong>87%</strong>。</li>
+<li><strong>MoE 推理在内存受限场景下触发专家权重卸载，CPU 成为专家调度的 Orchestrator。</strong> 2026 年 Speculating Experts 与 FluxMoE 等研究指出，专家权重从 CPU DRAM 按需加载会制造严重的 CPU-GPU 传输瓶颈；基于内部表示的推测预取可将 TPOT 降低 <strong>14%</strong>。NVIDIA Wide EP（2025-12）进一步将 host 侧压力从单请求驱动推向批级路由、拓扑感知放置和跨 GPU/跨节点数据流协同。</li>
+<li><strong>PD 分离（Prefill-Decode Disaggregation）使机头 CPU 从"单节点调度器"升级为"跨池编排中枢"。</strong> 2025 下半年至 2026 年，PD 分离已成为生产默认架构。机头 CPU 需要管理跨节点 KV Cache 传输（同节点 &lt;0.1% 开销，跨节点需 <strong>90 Gbps+</strong>）、序列化/反序列化以及预填充池与解码池的动态负载均衡。llm-d 0.5 的 UCCL Backend 验证了 CPU 管理 host-resident 传输栈可将网络拥塞下尾延迟恶化控制在 <strong>7.1%</strong>（对比 UCX 的 17.1%）。</li>
+<li><strong>真实 Agentic 产品形态正在暴露三项传统 serving 论文容易忽略的 CPU 需求：</strong>
+<ul>
+<li><strong>高频 prefill-first 调度</strong>（OpenClaw / 手机 GUI Agent 的多模态截图输入 + 短回合切换）</li>
+<li><strong>多上下文并存管理</strong>（Claude Code subagents 的独立 context window）</li>
+<li><strong>极宽 fan-out/fan-in 瞬时并发</strong>（Kimi Agent Swarm 的 100 sub-agents）</li>
+</ul>
+</li>
+<li><strong>CPU:GPU 配比正发生结构性翻转。</strong> 产业共识（NVIDIA GTC 2026、TrendForce、Arm）认为，传统 AI 数据中心 1:4–1:8 的 CPU:GPU 比例将向 <strong>1:1–1:2</strong> 演进；NVIDIA Vera CPU（88 核 Olympus / 1.2 TB/s LPDDR5X）、AMD EPYC Turin（192 核 / 614 GB/s）、Intel Xeon 6/7 均针对 Agentic 编排场景强化内存带宽与一致性互连。Vera 的 Agentic sandbox 性能达到 x86 竞品的 <strong>1.5×</strong>，Redpanda cross-core 吞吐领先 <strong>73%</strong>。</li>
+</ul>
+<hr>
+<h2 id="概念边界">概念边界 </h2>
+<h3 id="1-什么叫算子下发">1. 什么叫"算子下发" </h3>
+<p>本文中的"算子下发"不是编译器语境里的 kernel fusion，而是更接近推理系统运行期的 host 侧下发与编排，包括：</p>
+<ul>
+<li>request 到达后的 <code>router / scheduler</code> 决策</li>
+<li><code>prefill</code> 与 <code>decode</code> 的解耦调度（PD 分离）</li>
+<li>KV block 的 <code>offload / reload / prefetch</code></li>
+<li>MoE token/expert 的分发和跨设备搬运</li>
+<li>RDMA / NVLink / NIXL / storage 传输的触发与管线化</li>
+<li>底层 CUDA Kernel 从 CPU host 进程向 GPU 的 launch 与同步</li>
+</ul>
+<h3 id="2-为什么-agentic-ai-会抬高-host-cpu-重要性">2. 为什么 agentic AI 会抬高 host CPU 重要性 </h3>
+<p>2026-04-17 的 NVIDIA Dynamo agentic inference 文章给出一组很关键的数据：在 agentic workload 中，后续调用的 cache hit 可达 <strong>85%-97%</strong>，4 个 teammate agent 聚合后可到 <strong>97.2%</strong>，累计 <strong>read/write ratio 为 11.7x</strong>。这意味着系统的价值重心从"多写一点新 KV"转到"把旧状态留住、路由对、提前取回、避免重算"。</p>
+<img src="assets/nvidia-dynamo-agentic-kv-readwrite-2026.webp" alt="Agentic inference 中 KV 累积读取显著高于写入" width="760">
+<blockquote>
+<p><strong>图：</strong> NVIDIA 给出的 agentic inference KV 读写曲线，说明 agentic 工作负载已经明显呈现 <code>write-once-read-many</code>。这直接抬高了 host 侧在保留、路由、预取和恢复上的权重。<br>
+来源：NVIDIA, <em>Full-Stack Optimizations for Agentic Inference with NVIDIA Dynamo</em>, 2026-04-17</p>
+</blockquote>
+<h3 id="3-相邻概念辨析">3. 相邻概念辨析 </h3>
+<table>
+<thead>
+<tr>
+<th>术语</th>
+<th>定义</th>
+<th>与本洞察的关联</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Kernel Launch / Dispatch</strong></td>
+<td>CPU host 进程通过 CUDA Runtime / Driver 向 GPU 提交 Kernel 并触发 MMIO Doorbell 写入的过程。</td>
+<td>CPU 单核性能、进程调度与 PCIe 延迟直接决定下发速度；高并发下 CPU Oversubscription 会导致 GPU 空闲等待。</td>
+</tr>
+<tr>
+<td><strong>KV 卸载 / KV Cache Offloading</strong></td>
+<td>将 Transformer 推理中产生的 Key-Value Cache 从 GPU HBM 转移到容量更大但带宽更低的主机 DRAM（或 SSD / CXL 内存扩展层），以支持更长上下文或更大 Batch。</td>
+<td>卸载策略需要在"容量扩展"与"CPU-GPU 传输延迟"之间权衡；CPU 负责管理页表、异步调度和数据搬运。</td>
+</tr>
+<tr>
+<td><strong>MoE（Mixture of Experts）</strong></td>
+<td>稀疏激活架构，每 Token 仅激活少量专家（Expert）子网络，可在总参数量巨大的同时保持较低的单 Token 计算量。</td>
+<td>当专家总数超过 GPU 显存容量时，未命中专家需从 CPU 内存加载；CPU 侧的路由预测、权重调度和 All-to-All 协调成为性能关键。</td>
+</tr>
+<tr>
+<td><strong>PD 分离 / Prefill-Decode Disaggregation</strong></td>
+<td>将计算密集的 prefill 阶段与内存带宽密集的 decode 阶段物理分离到不同 GPU 池，各自独立优化与扩展。</td>
+<td>分离后机头 CPU 需承担跨节点 KV Cache 传输协调、序列化/反序列化、池间负载均衡等新增职责。</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="现状判断机头-cpu-已进入推理关键路径">现状判断：机头 CPU 已进入推理关键路径 </h2>
+<h3 id="1-算子下发正在从单机-kernel-launch演化为分离式推理编排">1. 算子下发正在从"单机 kernel launch"演化为"分离式推理编排" </h3>
+<p>2026-03-23 的 NVIDIA Kubernetes 文章把 <code>disaggregated LLM inference</code> 明确拆成 <code>ingress-router</code>、<code>prefill worker</code>、<code>decode worker</code>，并用 NIXL 负责节点间高吞吐数据传输。这个拆法本身就说明，host 侧需要承担的事情已经不仅是把请求扔给一张 GPU，而是：</p>
+<ul>
+<li>决定请求该进哪个 router</li>
+<li>把 prefill 产物和 KV 状态送到后续 decode worker</li>
+<li>配合调度器维持 worker affinity、拓扑感知和恢复路径</li>
+<li>让 Kubernetes / service mesh / transfer library 与推理 runtime 连成一条低抖动数据面</li>
+</ul>
+<img src="assets/nvidia-k8s-disagg-serving-2026.webp" alt="Disaggregated LLM inference 将 ingress router、prefill 和 decode 分开部署" width="760">
+<blockquote>
+<p><strong>图：</strong> NVIDIA 在 Kubernetes 上展示的解耦式推理拓扑。它反映出 host 侧职责从"单机发命令"扩展为 <code>router + stage scheduling + transfer orchestration</code>。<br>
+来源：NVIDIA, <em>Deploying Disaggregated LLM Inference Workloads on Kubernetes</em>, 2026-03-23</p>
+</blockquote>
+<p>对 CPU 的直接含义是：</p>
+<ul>
+<li><strong>单核尾延迟要稳</strong>：router、状态机、完成队列和中断处理都怕抖动</li>
+<li><strong>核数不能过低</strong>：agentic workload 带来更多并发的短控制任务，而非单一长核函数</li>
+<li><strong>PCIe / NIC / GPU 拓扑要友好</strong>：否则 dispatch 决策和实际数据流不一致</li>
+<li><strong>软件栈要轻</strong>：K8s、runtime、transfer library、监控 agent 本身都会吃 host 资源</li>
+</ul>
+<h3 id="2-nixl--数据搬运把-host-cpu-从控制面推向轻数据面">2. NIXL / 数据搬运把 host CPU 从"控制面"推向"轻数据面" </h3>
+<p>2026-03-09 的 NVIDIA Inference Transfer Library（NIXL）文章强调它支持 <code>RDMA, NVLink, TCP sockets, NVMe-oF</code>，目标是给分布式推理提供统一的数据移动抽象。这里的重点不是"又多了一个通信库"，而是：</p>
+<ul>
+<li>agentic inference 的真实瓶颈正在转向 <strong>跨阶段、跨节点的状态搬运</strong></li>
+<li>host CPU 需要持续驱动 completion、buffer lifecycle、memory registration 和异步管线</li>
+<li>如果 CPU 侧内存子系统、IOMMU 或中断处理不稳，GPU 闲等会直接放大</li>
+</ul>
+<p>基于这些资料，可以做出一个稳健推断：<br>
+对 agentic 推理节点，<strong>host CPU 的价值正在从"发命令"向"编排+搬运+恢复"三合一角色迁移</strong>。</p>
+<h3 id="3-平台信号vera-rubin-与-bluefield-4-说明-cpu-正被前移为控制平面">3. 平台信号：Vera、Rubin 与 BlueField-4 说明 CPU 正被前移为控制平面 </h3>
+<p>2026 年的平台设计已经开始把 host CPU 明确当成 agentic / inference orchestration 的控制平面。其中最值得吸收的是两点：</p>
+<ul>
+<li><strong>Vera CPU 的设计方向</strong>：88 核 Olympus、<code>1.2 TB/s</code> LPDDR5X、<code>1.8 TB/s</code> NVLink-C2C，显示厂商正在用"高每核带宽 + 高一致性互连"去服务机头调度，而不只是追传统通用 CPU 指标。</li>
+<li><strong>BlueField-4 / SuperNIC 的协同方向</strong>：网络、存储与安全处理进一步从 host CPU 旁路出去，意味着平台设计已经默认"CPU 应该把预算优先花在推理编排，而不是杂项数据面任务上"。</li>
+</ul>
+<p>这类信号本身不直接证明某个具体 serving 栈一定会获得多少推理收益，但它强化了主判断：<br>
+<strong>机头 CPU 已经不是 GPU 服务器里的配套部件，而是在新平台里被当成第一层编排器来定义。</strong></p>
+<img src="assets/nvidia-vera-cpu-architecture.png" alt="NVIDIA Vera CPU 架构概览" width="760">
+<blockquote>
+<p><strong>图：</strong> Vera CPU 的高带宽内存与高带宽 CPU-GPU 互连，说明平台设计正在围绕 agentic orchestration 的控制平面需求展开。<br>
+来源：NVIDIA, <em>NVIDIA Vera CPU Delivers High Performance, Bandwidth, and Efficiency for AI Factories</em>, 2026-03</p>
+</blockquote>
+<img src="assets/nvidia-vera-rubin-6chips.png" alt="NVIDIA Vera Rubin 六芯片协同架构" width="760">
+<blockquote>
+<p><strong>图：</strong> Vera、Rubin、NVLink Switch、BlueField-4 和以太网交换机构成更强耦合的平台，反映出机头 CPU 在系统级编排中的位置前移。<br>
+来源：StorageReview, <em>NVIDIA Launches Vera Rubin Architecture at CES 2026</em>, 2026-01</p>
+</blockquote>
+<img src="assets/nvidia-bluefield4.png" alt="BlueField-4 DPU 架构" width="760">
+<blockquote>
+<p><strong>图：</strong> BlueField-4 进一步卸载网络、存储和安全路径，使 host CPU 更聚焦于调度、状态和推理编排。<br>
+来源：StorageReview, <em>NVIDIA Launches Vera Rubin Architecture at CES 2026</em>, 2026-01</p>
+</blockquote>
+<h3 id="4-机头-cpu-产品横向对比vera-vs-epyc-turin-vs-xeon-6">4. 机头 CPU 产品横向对比：Vera vs EPYC Turin vs Xeon 6 </h3>
+<p>截至 2026 年 Q2，三大厂商均发布了面向 Agentic AI 推理的机头 CPU 方案，但设计哲学差异显著：</p>
+<table>
+<thead>
+<tr>
+<th>指标</th>
+<th>NVIDIA Vera</th>
+<th>AMD EPYC Turin</th>
+<th>Intel Xeon 6 Granite Rapids</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>核心架构</strong></td>
+<td>88 核 Olympus (Armv9.2)，单芯片单片设计</td>
+<td>最高 192 核 Zen 5，Chiplet 设计</td>
+<td>最高 128 核 P-core，Chiplet 设计</td>
+</tr>
+<tr>
+<td><strong>线程/并发</strong></td>
+<td>176 线程 (SMT，物理分区)</td>
+<td>384 线程 (SMT)</td>
+<td>256 线程 (HT)</td>
+</tr>
+<tr>
+<td><strong>内存带宽</strong></td>
+<td><strong>1.2 TB/s</strong> LPDDR5X (~14 GB/s 每核)</td>
+<td>~614 GB/s DDR5 (~3.2 GB/s 每核)</td>
+<td>~307 GB/s DDR5 (~2.4 GB/s 每核)</td>
+</tr>
+<tr>
+<td><strong>GPU 互联</strong></td>
+<td>NVLink-C2C 1.8 TB/s</td>
+<td>PCIe Gen5 x128</td>
+<td>PCIe Gen5</td>
+</tr>
+<tr>
+<td><strong>Agentic 相关实测</strong></td>
+<td>沙箱性能 <strong>1.5×</strong> 于 x86 竞品；Redpanda cross-core 吞吐 <strong>+73%</strong>；64 核后仍持续扩展</td>
+<td>多线程吞吐领先，但 32 核后带宽饱和导致扩展平坦</td>
+<td>单核频率高（5.0–5.7 GHz），延迟敏感型负载占优</td>
+</tr>
+<tr>
+<td><strong>独立部署</strong></td>
+<td>已确认 standalone 商业模式（Meta、CoreWeave 等）</td>
+<td>传统服务器市场主导</td>
+<td>受 18A 良率影响，量产可能延迟至 2027</td>
+</tr>
+<tr>
+<td><strong>关键限制</strong></td>
+<td>PCIe 控制器 reportedly 与第三方 GPU 存在兼容性问题</td>
+<td>无</td>
+<td>功耗与 TCO 略高于 Turin</td>
+</tr>
+</tbody>
+</table>
+<p><strong>关键洞察：</strong></p>
+<ul>
+<li><strong>Vera 的优势在于单芯片统一内存域 + 极高每核带宽</strong>，对 Kernel Launch 密集、沙箱执行密集、KV Cache 调度的 Agentic 负载极为适配；但 88 核上限意味着纯核心数密集型负载（如大规模并行数据处理）仍可能落后于 192 核的 Turin。</li>
+<li><strong>AMD Turin 仍是核心密度与 TCO 冠军</strong>，每美元吞吐量最高，但 Chiplet 架构在跨 CCD 通信时存在 NUMA 延迟，对需要频繁跨核同步的调度任务不利。</li>
+<li><strong>Intel Granite Rapids 单核频率最高</strong>，在需要极低尾延迟的 tokenization、JSON 解析、API 序列化等串行任务上仍有优势，但内存带宽和核心密度双双落后。</li>
+<li><strong>机头 CPU 选型正在分层：</strong> GPU 伴随型（co-located）推理节点可能优先 Vera（C2C 带宽 + 统一内存）；通用推理网关与纯 CPU 编排节点可能继续沿用 EPYC Turin（成本 + 软件生态）；对延迟极度敏感的边缘推理节点可能选择 Intel（高主频）。</li>
+</ul>
+<hr>
+<h2 id="场景一算子下发与状态驱动调度">场景一：算子下发与状态驱动调度 </h2>
+<h3 id="1-为什么-agentic-比传统-chat-更吃-cpu">1. 为什么 agentic 比传统 chat 更吃 CPU </h3>
+<p>传统 chat serving 更接近单条请求连续 decode。agentic inference 则会频繁经历：</p>
+<ol>
+<li>prefill</li>
+<li>decode</li>
+<li>外部阶段切换</li>
+<li>暂停</li>
+<li>KV 保留或卸载</li>
+<li>恢复</li>
+<li>可能再分叉给多个 subagents</li>
+</ol>
+<p>这一流程让 CPU 需要不断做：</p>
+<ul>
+<li>request state transition</li>
+<li>worker affinity 决策</li>
+<li>KV object 生命周期跟踪</li>
+<li>transfer/prefetch 触发</li>
+<li>多 agent fan-out / fan-in 的回收与复用</li>
+</ul>
+<h3 id="2-微观瓶颈从内存墙到调度墙">2. 微观瓶颈：从"内存墙"到"调度墙" </h3>
+<p>2026 年 3 月的一篇深度工程实测揭示了一个被忽视的新范式：当模型通过 IQ4/FP4 等激进量化手段被压缩到可完全驻留 GPU L2 Cache 时，内存带宽瓶颈消失，但<strong>算子下发（Dispatch）瓶颈凸显</strong>。一个 135M 参数的量化模型单次前向传播发射 301 个 Kernel，每个 Launch 约 2.5 μs，总计 <strong>750 μs</strong> 的纯下发税，几乎等于单 Token 总时间（792 μs）。Kernel Fusion 将发射次数降至 181 次后，吞吐提升 <strong>20%</strong>（1255 → 1508 tok/s）。</p>
+<p>这一因果链对机头 CPU 的选型有直接影响：</p>
+<ul>
+<li><strong>量化降低显存压力 → 模型更小 → Batch 内可容纳更多请求 → Kernel 发射频率更高 → CPU 调度负载更重。</strong></li>
+<li>2026 年 1 月的 LongCat-Flash-Lite 论文同样观察到，在轻量模型+大有效 Batch Size 场景下，瓶颈从内存带宽转向 Kernel Launch Overhead，需通过 extensive kernel fusion 与 NVIDIA PDL（Programmatic Dependent Launch）缓解。</li>
+<li>FlashNorm（2026-04）的微观分析指出，单次 Kernel Launch 在 A100 上约 <strong>10–15 μs</strong>，加上中间张量分配（~5 μs）和 HBM 往返，每次融合可节省 <strong>15–25 μs</strong> 固定开销——这部分开销与模型规模无关，纯粹由 CPU 驱动栈决定。</li>
+</ul>
+<h3 id="3-cpu-竞争将微秒级开销放大为毫秒级集群停滞">3. CPU 竞争将微秒级开销放大为毫秒级集群停滞 </h3>
+<p>2026 年 3 月论文《Characterizing CPU-Induced Slowdowns in Multi-GPU LLM Inference》系统量化了该问题：</p>
+<ul>
+<li>vLLM 在 H100 上运行 Llama 3 8B 时，HTTP 服务占 <strong>33%</strong> 执行时间，调度+输入准备占 <strong>29%</strong>，GPU 实际计算仅 <strong>38%</strong>。</li>
+<li>当 CPU 进程数超过可用核心数时，Kernel Launch 延迟从 μs 级恶化到 ms 级；在 NCCL 集合通信中，若某一 Rank 的 CPU 被抢占 1 ms，所有 GPU 忙等放大为集群级停滞。</li>
+<li>vLLM 的 <code>shm_broadcast.py</code> 广播队列在 5 req/s、100k Token 输入的 TP=4 场景下，dequeue 延迟从 12 ms 恶化到 <strong>228 ms</strong>（19 倍），是 GPU 单步解码时间（44 ms）的 5 倍以上。</li>
+</ul>
+<h3 id="4-推理引擎层面的-cpu-优化以-vllm-v1-为例">4. 推理引擎层面的 CPU 优化——以 vLLM V1 为例 </h3>
+<p>2025 年 1 月发布的 vLLM V1（于 2025 下半年成为默认引擎）是一次针对机头 CPU 开销的系统性重构：</p>
+<ul>
+<li><strong>Persistent Batch：</strong> 缓存输入张量，每步仅应用增量 diffs，避免每步重建张量的 Python 开销。</li>
+<li><strong>Numpy 替代 Python Native：</strong> 在调度器与数据准备路径上用 Numpy 操作替代原生 Python，显著降低 CPU 占用。</li>
+<li><strong>Zero-Overhead Prefix Caching：</strong> 即使 Cache 命中率为 0%，吞吐损失也 &lt; 1%，消除了 V0 中因前缀缓存数据结构导致的 CPU 瓶颈。</li>
+<li><strong>多模态输入预处理 Offload：</strong> 将图像解码与预处理放到独立进程，避免阻塞 GPU Worker。</li>
+<li><strong>Piecewise CUDA Graphs：</strong> 在保持动态调度能力的同时，尽可能捕获静态子图的 CUDA Graph，减少重复 Kernel Launch。</li>
+</ul>
+<p>实测显示，V1 在文本模型上吞吐比 V0 提升最高 <strong>1.7×</strong>；在视觉语言模型（Qwen2-VL）上提升更为显著。vLLM 2026 Q1 Roadmap 进一步将 "Python overhead reduction"、"CPU KV cache production ready" 与 "disaggregated prefilling" 列为重点，表明社区已明确意识到机头 CPU 是下一阶段的优化主战场。</p>
+<h3 id="5-pd-分离算子下发在解耦架构下的延伸">5. PD 分离：算子下发在解耦架构下的延伸 </h3>
+<h4 id="51-pd-分离已从研究概念变为-20252026-年生产默认架构">5.1 PD 分离已从研究概念变为 2025–2026 年生产默认架构 </h4>
+<p>2024 年的 DistServe 与 Splitwise 首次系统论证了 PD 分离的收益，而到 2025 年底，Hao AI Lab 的回顾性分析确认该架构已成为"几乎每个主要 LLM 服务栈的默认手册"。vLLM、SGLang、NVIDIA Dynamo、TensorRT-LLM 与 llm-d 均已原生支持 PD 分离。</p>
+<p>对机头 CPU 而言，PD 分离意味着<strong>调度器不再只管理单节点 GPU，而是需要跨节点协调 KV Cache 的序列化、传输与反序列化</strong>。vLLM 的 <code>vllm/distributed/kv_transfer</code> 模块通过 Connector + LookupBuffer + Pipe 三层抽象实现跨实例 KV 搬运；TensorRT-LLM 则在预填充节点与解码节点之间通过网络层传输 KV Cache Block。</p>
+<h4 id="52-kv-cache-传输开销高度依赖-cpu-侧网络栈与调度效率">5.2 KV Cache 传输开销高度依赖 CPU 侧网络栈与调度效率 </h4>
+<ul>
+<li><strong>同节点 NVLink：</strong> DistServe 报告传输开销 &lt; 总服务时间的 <strong>0.1%</strong>，可忽略。</li>
+<li><strong>跨节点网络：</strong> Splitwise 计算表明，OPT-66B 在 512 Token 输入下产生约 <strong>1.13 GB</strong> KV Cache；若请求率达到 10 req/s，需约 <strong>90 Gbps</strong> 带宽才能避免瓶颈。</li>
+<li><strong>llm-d 0.5（2026-02）的 UCCL Backend：</strong> 采用 host-resident software transport stack，由 CPU 管理传输逻辑而非完全依赖硬件卸载，在网络拥塞下尾延迟恶化仅 <strong>7.1%</strong>（对比 UCX 的 17.1%），验证了机头 CPU 在拥塞控制中的关键作用。</li>
+</ul>
+<h4 id="53-agentic-长交互进一步放大-cpu-调度压力">5.3 Agentic 长交互进一步放大 CPU 调度压力 </h4>
+<p>Agentic 工作负载通常表现为<strong>短输入 + 极长输出</strong>（多轮工具调用后的推理链），这意味着 decode 阶段持续时间远超 prefill。PD 分离后，decode 池需要长时间维持大量并发流的 KV Cache 状态，而 prefill 池则需快速处理频繁到达的新工具调用结果。机头 CPU 的调度器必须在两个池之间做动态负载均衡，并处理 KV Cache 的跨池预热、迁移与回收。vLLM 2026 Q1 Roadmap 明确将"CPU KV cache production ready"和"disaggregated prefilling &amp; KV transfer support"列为核心目标，侧面反映了 CPU 侧调度复杂度正在快速上升。</p>
+<h3 id="6-缓解路径汇总">6. 缓解路径汇总 </h3>
+<ul>
+<li><strong>Kernel Fusion：</strong> 将残差相加、RMSNorm、RoPE、KV Cache 写入、通信操作（AllReduce + Residual Add + RMSNorm）融合为单 Kernel，减少 Launch 次数。</li>
+<li><strong>Persistent Kernel / Megakernel：</strong> Event Tensor（2026-04）将动态控制流编码为 Tile 级依赖图，生成跨算子的持久化 Kernel，消除跨 Kernel 边界同步。</li>
+<li><strong>PDL（Programmatic Dependent Launch）：</strong> NVIDIA 2026 年技术允许有依赖关系的 Kernel 提前触发、重叠执行间隙，提升 SM 利用率。</li>
+<li><strong>推理引擎重构：</strong> vLLM V1 的 Persistent Batch、Zero-Copy DMA、前缀缓存优化与进程结构扁平化。</li>
+<li><strong>CPU 核心扩容与隔离：</strong> 确保每 GPU 配有足够且隔离的 Host 核心，避免 OS 调度器介入关键路径；多模态预处理等任务应 offload 到独立进程。</li>
+<li><strong>PD 分离的网络栈优化：</strong> 采用 UCCL 等 host-driven 传输后端以提升拥塞恢复能力；在跨节点场景确保 90 Gbps+ 可用带宽。</li>
+</ul>
+<hr>
+<h2 id="场景二kv-卸载要求什么样的机头-cpu">场景二：KV 卸载要求什么样的机头 CPU </h2>
+<h3 id="1-cpu-内存已经是温热层而不是单纯-spill-层">1. CPU 内存已经是温热层，而不是单纯 spill 层 </h3>
+<p>2025-09-18 的 NVIDIA Dynamo KV 文章把 KV offload 明确写成可落到 <code>CPU RAM</code>、<code>local SSD</code> 和 <code>network storage</code>。这不是简单的容量扩展表述，而是在承认推理系统正在走向分层状态存储。</p>
+<p>2025-09-05 的 NVIDIA CPU-GPU memory sharing 文章进一步指出，Grace Hopper / Grace Blackwell 可以通过 <strong>NVLink-C2C 900 GB/s</strong> 的 coherent interconnect 共享统一内存地址空间。对机头 CPU 的含义非常直接：</p>
+<ul>
+<li>CPU DRAM 不再只是慢速备份，而是恢复路径中的 <strong>首层温热 KV 池</strong></li>
+<li>页表、pinning、IOMMU、NUMA 选路开始真实影响 token latency</li>
+<li>host 内存容量和持续带宽会比传统"GPU 服务器配个普通 CPU"更关键</li>
+</ul>
+<img src="assets/cpu-gpu-unified-memory.webp" alt="CPU-GPU 统一地址空间让 CPU 内存更适合作为 KV 温热层" width="760">
+<blockquote>
+<p><strong>图：</strong> CPU 与 GPU 通过高带宽一致性互连共享地址空间，使 host memory 更适合承担 KV 的 overflow / staging / warm tier。<br>
+来源：NVIDIA, <em>Accelerate Large-Scale LLM Inference and KV Cache Offload with CPU-GPU Memory Sharing</em>, 2025-09-05</p>
+</blockquote>
+<h3 id="2-agentic-ai-把-kv-管理从容量问题升级成生命周期问题">2. Agentic AI 把 KV 管理从"容量问题"升级成"生命周期问题" </h3>
+<p>2026-04-17 的 Dynamo agentic inference 文章把 <code>retention</code>、<code>routing</code>、<code>prefetch</code> 和 <code>WORM-like reuse</code> 放在同一套优化框架里。对应到机头 CPU，意味着：</p>
+<ul>
+<li>不能只看 DRAM 容量，还要看 <strong>恢复时能多快把 KV 拉回 GPU</strong></li>
+<li>不能只看平均带宽，还要看 <strong>pause-resume 的尾延迟</strong></li>
+<li>不能只看 page cache，还要看 <strong>pinned memory / hugepage / IOMMU map 更新</strong> 的管理成本</li>
+</ul>
+<p>以 Qwen3-32B FP16、64K 序列为例，KV Cache 占用约 <strong>16 GB</strong>。在多轮 Agentic 交互或长文档推理中，Cache 规模随 Batch Size 与序列长度线性增长，显存溢出成为常态。</p>
+<h3 id="3-稀疏化--卸载是-2025-下半年以来的主攻方向">3. 稀疏化 + 卸载是 2025 下半年以来的主攻方向 </h3>
+<ul>
+<li><strong>NOSA（2025-10，arXiv）：</strong> 首个"原生为 KV Cache Offloading 设计"的可训练稀疏注意力机制。它显式约束 CPU-GPU KV 传输量，在 1B/3B/8B 模型上相比全注意力实现最高 <strong>5.04×</strong> 解码吞吐提升，相比 InfLLMv2 和 ShadowKV 分别提升 <strong>1.92×</strong> 和 <strong>1.83×</strong>。</li>
+<li><strong>ScoutAttention（2026-03，arXiv）：</strong> 提出 Layer-Ahead CPU Pre-computation 算法，让 CPU 提前一层启动 Attention 计算，并通过异步周期性召回机制保持极低 CPU 负载。在保持精度损失 &lt; 2.4% 的前提下，相比现有卸载方法实现 <strong>2.1×</strong> 加速。</li>
+<li><strong>CoMEM（2025，OpenReview）：</strong> 针对 Agentic 长上下文，将历史压缩任务卸载到轻量级异步记忆模型，通过 k-step-off Pipeline 重叠记忆摘要与 Agent 执行，解码开销降低 <strong>1.4×</strong>。</li>
+</ul>
+<h3 id="4-cpu-在卸载系统中的角色转变">4. CPU 在卸载系统中的角色转变 </h3>
+<p>CPU 不再只是"数据搬运工"，而是 KV Cache 的<strong>分级内存管理者</strong>：</p>
+<ul>
+<li><strong>页级调度：</strong> 类似操作系统 Swap，决定哪些 KV 页驻留 GPU、哪些降级到主机/CXL/SSD。</li>
+<li><strong>检索与预取：</strong> 在稀疏注意力场景中，CPU 需动态估计 Token 重要性并预取相关 KV 块；若每步都触发检索，累积开销会抵消卸载收益。</li>
+<li><strong>协同计算：</strong> ScoutAttention 等方案让 CPU 直接参与部分 Attention 计算，而非单纯传输数据，这要求机头 CPU 具备更强的向量/矩阵运算能力。</li>
+</ul>
+<h3 id="5-cxl-进一步把主机内存层从技术问题变成经济问题">5. CXL 进一步把"主机内存层"从技术问题变成经济问题 </h3>
+<p>Astera Labs 的 Leo CXL Smart Memory Controller（2025-11 实测数据）显示，在生产级 LLM 推理负载中：</p>
+<ul>
+<li>KV Cache 存储于 CXL 内存可减少 GPU 需求达 <strong>87%</strong></li>
+<li>Prefill 阶段 GPU 利用率提升 <strong>75%</strong></li>
+<li>每查询 CPU 利用率降低 <strong>40%</strong></li>
+<li>系统可支持 <strong>2 倍</strong> 并发 LLM 实例</li>
+</ul>
+<p>这些数字本身来自厂商建模，不应当被当成通用部署结果；但它们足以说明一件更稳定的事：<br>
+<strong>当 KV cache 的 warm tier 从"只能放主机 DRAM"扩展到"主机 DRAM + CXL memory"，机头 CPU 的价值就不只是容量兜底，而是整个推理经济模型的一部分。</strong></p>
+<h3 id="6-kv-卸载对-cpu-选型的具体启示">6. KV 卸载对 CPU 选型的具体启示 </h3>
+<ul>
+<li><strong>内存容量优先级上升：</strong> agentic session、长前缀、共享模板和多 agent 扇出会一起抬高 host-side warm KV 容量需求</li>
+<li><strong>内存带宽要足够持续：</strong> 不是一次性爆发，而是持续 serving 下的平稳数据回填</li>
+<li><strong>NUMA 拓扑要和 GPU/NIC 对齐：</strong> 否则 offload/reload 的路径绕远，CPU 只会更忙</li>
+<li><strong>I/O 栈要低抖动：</strong> KV tiering 接入本地 SSD 或网络存储后，host 成为真正的 state broker</li>
+<li><strong>对 co-located GPU 节点，重点是 <code>HBM -&gt; coherent CPU memory</code> 的快速回填</strong></li>
+<li><strong>对容量优先型节点，重点是 <code>HBM -&gt; host DRAM / CXL tier</code> 的分层经济性</strong></li>
+<li><strong>对多租户/长上下文场景，重点不只是"能不能卸"，而是"卸到哪一层最划算"</strong></li>
+</ul>
+<hr>
+<h2 id="场景三moe-把机头-cpu变成路由与通信编排器">场景三：MoE 把"机头 CPU"变成路由与通信编排器 </h2>
+<h3 id="1-2025h2-之后的公开资料显示moe-已经不是单卡-kernel-问题">1. 2025H2 之后的公开资料显示，MoE 已经不是单卡 kernel 问题 </h3>
+<p>2025-12-18 的 NVIDIA Wide Expert Parallelism 文章讨论在 NVL72 机架级系统上扩展大规模 MoE。文章核心不是单个 expert 算得多快，而是：</p>
+<ul>
+<li>token 如何按 expert 路由</li>
+<li>expert 如何在大规模 GPU 间放置</li>
+<li>通信如何被压平、隐藏或重叠</li>
+<li>系统如何把 expert parallel 从"能跑"推进到"高吞吐可部署"</li>
+</ul>
+<img src="assets/nvidia-wide-ep-moe-2025.webp" alt="Wide expert parallelism 展示了 MoE 在大规模 GPU 系统上的跨设备组织方式" width="760">
+<blockquote>
+<p><strong>图：</strong> NVIDIA 关于 wide expert parallelism 的示意图，强调 MoE 推理的关键已经扩展到 expert 路由、并行放置和通信拓扑，而非仅是单个 GEMM。<br>
+来源：NVIDIA, <em>Scaling Large MoE Models with Wide Expert Parallelism on NVL72 Rack-Scale Systems</em>, 2025-12-18</p>
+</blockquote>
+<h3 id="2-专家权重卸载是内存受限部署的必然选择">2. 专家权重卸载是内存受限部署的必然选择 </h3>
+<p>以 DeepSeek-R1（671B 总参 / 37B 激活参）为例，单节点 GPU 无法容纳全部专家权重。当专家权重被卸载到 CPU 内存时，每次 Token 路由命中冷专家都会触发同步 CPU→GPU 拷贝，成为解码阶段的决定性瓶颈。</p>
+<p>Mixtral-8x7B 中每个 Token 可访问 47B 总参数，但仅 13B 参与计算，实现约 <strong>3.6×</strong> 的激活计算削减。这种"稀疏激活"特性使 MoE 在推理时具有天然效率优势，但也引入了独特的 host-side 复杂性。</p>
+<h3 id="3-推测预取与异步流水线是-2026-年的主要突破">3. 推测预取与异步流水线是 2026 年的主要突破 </h3>
+<ul>
+<li><strong>Speculating Experts（2026-03，arXiv）：</strong> 利用当前层已计算的内部表示（归一化残差流 + 默认向量）推测下一层将激活的专家，实现权重预取与 GPU 计算的重叠。在 Qwen-30B-A3B 等模型上，相比按需加载实现 <strong>14%</strong> 的 TPOT 降低。若推测执行精度不足，还可叠加轻量级估计器提升命中率。</li>
+<li><strong>FluxMoE（2026-04，arXiv）：</strong> 解耦"逻辑专家身份"与"物理驻留位置"，通过带宽均衡的存储层次（压缩 GPU 内存 + 主机 DRAM）动态流式化参数，摆脱对路由预测准确率的依赖。</li>
+<li><strong>中国科学技术大学专利（2025，CN）：</strong> 提出异步并行推理方法，将 GPU 计算与 Expert Parallelism 固有的 All-to-All 通信解耦，允许 Token 数据通信与模型计算异步并行；同时策略性将热点专家常驻 GPU、冷点专家卸载 CPU。</li>
+</ul>
+<h3 id="4-cpu-在-moe-中的三重负载">4. CPU 在 MoE 中的三重负载 </h3>
+<ol>
+<li><strong>权重搬运：</strong> PCIe / C2C 带宽有限，CPU 负责将专家权重从主机内存拷贝到 GPU。</li>
+<li><strong>路由协调：</strong> All-to-All 集合通信的同步信号由 CPU 侧进程驱动；若任一 Rank 的 CPU 延迟，全网 GPU 等待。</li>
+<li><strong>负载均衡与调度：</strong> 动态专家剪枝、容量因子调整、冷热专家分级策略均需在 CPU 侧实时决策。</li>
+</ol>
+<p>MoE 看起来是 GPU 场景，但对 host CPU 的要求反而更尖锐，因为 CPU 必须配合做：</p>
+<ul>
+<li><strong>批级路由组织：</strong> token/expert 映射、微批分组、跨 worker 调度</li>
+<li><strong>拓扑感知编排：</strong> 哪些 expert 留在本机、哪些跨节点，直接决定通信图</li>
+<li><strong>数据搬运与完成队列管理：</strong> EP/all-to-all 的控制与生命周期管理并不全在 GPU 内部自发完成</li>
+<li><strong>与服务框架协同：</strong> MoE 常和 disaggregated serving、prefill/decode split、KV reuse 一起出现，而不是单独出现</li>
+</ul>
+<p>一个重要推断是：<br>
+随着 agentic workload 引入更多多阶段推理、上下文复用和多代理并发，MoE 的 host-side 复杂度不会下降，反而会与 <code>route + transfer + KV</code> 三者叠加。因此，机头 CPU 更像 <strong>orchestration processor</strong>，而不是"配套 CPU"。</p>
+<hr>
+<h2 id="典型-agentic-workload-反推还有哪些-cpu-需求容易漏掉">典型 Agentic Workload 反推：还有哪些 CPU 需求容易漏掉 </h2>
+<blockquote>
+<p>这一节只看 <strong>agentic LLM inference 对 CPU 的影响</strong>。不把工具本身的执行开销算进来，例如浏览器渲染、ADB 点击、代码编译、搜索抓取等直接工具负载都排除在外。</p>
+</blockquote>
+<h3 id="1-openclaw--手机-gui-agent-类不能低估多模态-prefill-和高频短回合切换">1. OpenClaw / 手机 GUI Agent 类：不能低估多模态 prefill 和高频短回合切换 </h3>
+<p>OpenClaw 官方仓库已经把产品形态定义为 <code>always-on</code> 的 personal AI assistant，并且覆盖 Android node、screen recording、camera、Canvas、device pairing 等持续在线入口。火山引擎在 2026-04-29 发布的 Mobile Use Agent 文章，则把这类产品进一步明确成基于云手机与豆包视觉模型的 <code>Mobile Use Agent</code>。</p>
+<p>基于这两类产品形态，可以做出较强但仍属推断的判断：对 host CPU 来说，即使完全不算工具执行本身，仍然会新增三类推理侧压力：</p>
+<ul>
+<li><strong>多模态 prefill 压力：</strong> 这类 GUI agent 往往需要把截图或界面状态送入模型，prefill 很可能比纯文本 agent 更重</li>
+<li><strong>高频短回合调度：</strong> 这类交互常表现为短回合、频繁状态刷新，decode 未必长，但请求切换频繁</li>
+<li><strong>更细粒度的 KV 生命周期管理：</strong> 单步推理可能较短，但状态连续性要求更高，host 更可能频繁做 session pinning、warm KV 保留和 resume</li>
+</ul>
+<p>这意味着，"KV 卸载"和"算子下发"的判断是对的，但还少强调了一点：<br>
+<strong>GUI agent 会把 CPU 压力从长 decode 进一步推向高频 prefill + 高频状态切换。</strong></p>
+<h3 id="2-claude-code-类不能低估长驻上下文和多-subagent-并发">2. Claude Code 类：不能低估长驻上下文和多 subagent 并发 </h3>
+<p>Anthropic 官方文档已明确说明，Claude Code <code>subagents</code> 各自拥有 <code>separate context window</code>，并且会因单独收集所需上下文而带来额外延迟。这件事对推理侧 CPU 的真正含义不是"工具多"，而是：</p>
+<ul>
+<li><strong>会话数暴增：</strong> 一个主代理外加多个 subagents，等价于更多并行或准并行上下文</li>
+<li><strong>prefill 占比上升：</strong> subagent 带着干净上下文启动，天然更容易形成 "短 burst + 重 prefill"</li>
+<li><strong>KV 复用更偏局部而不是全局：</strong> 主代理和子代理不会天然共享同一整块上下文，host 需要更细地做 session-level placement 和复用决策</li>
+</ul>
+<p>因此，对 Claude Code 这类 workload，还漏了一项明确表述：<br>
+<strong>host CPU 需要为"多上下文并存"而不是"单上下文超长"做优化。</strong><br>
+这会抬高 admission control、per-session queue、KV placement 和尾延迟隔离的重要性。</p>
+<h3 id="3-kimi-agent-swarm-类不能低估-fan-outfan-in-的瞬时并发宽度">3. Kimi Agent Swarm 类：不能低估 fan-out/fan-in 的瞬时并发宽度 </h3>
+<p>Kimi 官方在 2026-04-11 的 Agent Swarm 文章里给出的产品形态非常直接：<code>up to 100 sub-agents working in parallel</code>。如果只看推理，不看工具执行本身，这种 workload 依然会给机头 CPU 带来一个此前还不够突出的要求：</p>
+<ul>
+<li><strong>瞬时 fan-out 调度能力：</strong> 大量子代理会在短时间内同时进入 prefill 或 decode</li>
+<li><strong>返回汇总时的 fan-in 压力：</strong> 上层代理需要消化来自多子代理的中间输出，再触发下一轮推理</li>
+<li><strong>批处理与公平性冲突：</strong> 为了提吞吐，系统会想做 batch；但 swarm workload 又容易因为宽并发而拖高尾延迟</li>
+</ul>
+<p>因此，Kimi Swarm 补充出的遗漏点是：<br>
+<strong>机头 CPU 不只是要"能跑高并发"，还要能处理极宽的 burst 并发和多层级调度。</strong></p>
+<h3 id="4-这些真实-workload-共同补出的三项遗漏">4. 这些真实 workload 共同补出的三项遗漏 </h3>
+<p>如果把 OpenClaw、Claude Code、豆包手机/Mobile Use Agent、Kimi Swarm 放在一起看，还应补上三条更聚焦的 CPU 诉求：</p>
+<ul>
+<li><strong>遗漏一：prefill-first CPU 观念</strong><br>
+过去容易把 host 压力理解成 decode 陪跑，但真实 agentic workload 很多时候更像 <code>频繁 prefill + 短 decode + 快速 resume</code></li>
+<li><strong>遗漏二：session multiplicity 而非单 session 长度</strong><br>
+Claude Code 和 Kimi Swarm 说明问题不只是上下文长，而是同时活跃的上下文条目太多</li>
+<li><strong>遗漏三：多模态 ingress 开销</strong><br>
+豆包手机/OpenClaw phone agent 说明，即便不算工具 CPU，截图/视觉输入进入推理链路本身也会放大 host 侧请求编排与内存压力</li>
+</ul>
+<p>换句话说，若只从底层 serving 论文出发，很容易得出"CPU 主要是 KV tiering + transfer"这个结论；但把真实产品 workload 放进来后，应该把结论修正为：</p>
+<p><strong>agentic LLM inference 对机头 CPU 的新增要求，除了 KV tiering 和 transfer，还包括 <code>高频 prefill 调度</code>、<code>多上下文并存管理</code>、<code>极宽 fan-out/fan-in</code> 和 <code>多模态 ingress 编排</code>。</strong></p>
+<hr>
+<h2 id="机头-cpu-的工程画像">机头 CPU 的工程画像 </h2>
+<p>结合上述证据，更合理的 agentic AI 节点 CPU 画像是：</p>
+<ul>
+<li><strong>更多可用核心，而不是只追单核峰值：</strong> 因为要扛 router、scheduler、prefetch、completion、存储 client、K8s/runtime sidecar</li>
+<li><strong>更大的主机内存：</strong> KV warm tier、agent state、prefill/decode 中间态都会吃容量</li>
+<li><strong>更好的内存带宽与 NUMA 可控性：</strong> 影响 KV reload/prefetch 的可持续效率</li>
+<li><strong>更强的 I/O 与 DMA 协同能力：</strong> RDMA / NVLink / NVMe-oF / NIC 队列管理都会经过 host 协调</li>
+<li><strong>更明确的分层部署思路：</strong> co-located GPU 节点更看重一致性互连与主机内存带宽，容量型节点更看重 DRAM/CXL tier 的成本效率</li>
+<li><strong>更稳的尾延迟而不是只看均值：</strong> agentic 场景对 pause-resume 和多阶段拼接极度敏感</li>
+</ul>
+<p>如果要把这几条压缩成一句话：<br>
+<strong>agentic AI 时代的机头 CPU，核心任务不是"替 GPU 算"，而是"确保 GPU 不因路由、状态和数据搬运而空等"。</strong></p>
+<hr>
+<h2 id="采购与架构建议">采购与架构建议 </h2>
+<h3 id="1-适合优先加码-cpu-的场景">1. 适合优先加码 CPU 的场景 </h3>
+<ul>
+<li>多 agent / 长生命周期会话 / 多阶段推理</li>
+<li>明确依赖 KV offload、resume、prefix reuse</li>
+<li>使用 disaggregated serving 或者准备上 Kubernetes 化部署</li>
+<li>准备在 MoE 上做大规模 expert parallel</li>
+<li>存在高并发短回合切换或多模态输入（GUI Agent、Mobile Use Agent）</li>
+<li>需要支持极宽 fan-out/fan-in（Agent Swarm、subagent 并发）</li>
+</ul>
+<h3 id="2-可以相对弱化-cpu-的场景">2. 可以相对弱化 CPU 的场景 </h3>
+<ul>
+<li>单轮短对话、前缀复用弱、几乎不做多阶段推理切换</li>
+<li>不做 KV offload，也不做 prefill/decode 解耦</li>
+<li>模型规模和并发都小，系统仍接近单机直连推理</li>
+<li>非 MoE 架构，且无跨 GPU 通信需求</li>
+</ul>
+<h3 id="3-一个实用判断标准">3. 一个实用判断标准 </h3>
+<p>如果你的服务已经出现下面任一迹象，就不该再把 host CPU 当成配角：</p>
+<ul>
+<li>GPU 利用率起伏很大，但显存和 FLOPS 并未打满</li>
+<li>多阶段 resume 的尾延迟明显高于纯 decode</li>
+<li>KV 命中率高，但端到端时延改善不成比例</li>
+<li>MoE 扩容后吞吐没按 GPU 数线性增长</li>
+<li>K8s / runtime / transfer sidecar 一开就吃掉大量 host core</li>
+<li>引入多模态输入后，prefill 延迟显著增加但 GPU 计算时间未变</li>
+<li>subagent 或 swarm 并发时，调度延迟出现阶跃式恶化</li>
+</ul>
+<h3 id="4-机头-cpu-选型分层建议">4. 机头 CPU 选型分层建议 </h3>
+<table>
+<thead>
+<tr>
+<th>节点类型</th>
+<th>首选平台</th>
+<th>关键理由</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>GPU 伴随型推理节点</strong>（co-located）</td>
+<td>NVIDIA Vera（或 Grace）</td>
+<td>NVLink-C2C 1.8 TB/s + 统一内存地址空间，KV reload/prefetch 路径最短</td>
+</tr>
+<tr>
+<td><strong>通用推理网关 / 纯 CPU 编排节点</strong></td>
+<td>AMD EPYC Turin</td>
+<td>192 核密度 + 成熟软件生态 + 最优 TCO；适合 router/scheduler/K8s 控制面</td>
+</tr>
+<tr>
+<td><strong>极致延迟敏感型边缘节点</strong></td>
+<td>Intel Xeon 6 Granite Rapids</td>
+<td>5.0–5.7 GHz 单核频率，tokenization/序列化/API 解析尾延迟最低</td>
+</tr>
+<tr>
+<td><strong>容量优先型 KV 存储节点</strong></td>
+<td>EPYC Turin + CXL 扩展</td>
+<td>大容量 DRAM + CXL Memory Pooling，分层经济性最佳</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="证据表">证据表 </h2>
+<table>
+<thead>
+<tr>
+<th>时间</th>
+<th>标题</th>
+<th>类型</th>
+<th>主题</th>
+<th>主要发现</th>
+<th>关联场景</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2025-09-05</td>
+<td>Accelerate Large-Scale LLM Inference and KV Cache Offload with CPU-GPU Memory Sharing</td>
+<td>NVIDIA 技术文章</td>
+<td>KV offload / unified memory</td>
+<td>Grace Hopper / Grace Blackwell 通过 NVLink-C2C 900 GB/s coherent interconnect 共享内存地址空间</td>
+<td>KV 卸载</td>
+</tr>
+<tr>
+<td>2025-09-18</td>
+<td>How to Reduce KV Cache Bottlenecks with NVIDIA Dynamo</td>
+<td>NVIDIA 技术文章</td>
+<td>KV offload hierarchy</td>
+<td>KV cache 可卸到 CPU RAM、local SSD、network storage</td>
+<td>KV 卸载</td>
+</tr>
+<tr>
+<td>2025-10</td>
+<td>NOSA: Native and Offloadable Sparse Attention</td>
+<td>论文 (arXiv)</td>
+<td>稀疏注意力 + KV 卸载</td>
+<td>显式约束 CPU-GPU KV 传输量，解码吞吐最高提升 5.04×</td>
+<td>KV 卸载</td>
+</tr>
+<tr>
+<td>2025-11</td>
+<td>Towards Understanding, Analyzing, and Optimizing Agentic AI Execution: A CPU-Centric Perspective</td>
+<td>论文 (arXiv)</td>
+<td>Agentic AI CPU 瓶颈量化</td>
+<td>工具处理占 E2E 延迟 50%–90.6%；CPU 并行效率远低于 GPU；提出 COMB/MAS 调度优化</td>
+<td>Agentic 编排</td>
+</tr>
+<tr>
+<td>2025-11</td>
+<td>How CXL Transforms RAG and KV Cache Performance</td>
+<td>厂商技术博客</td>
+<td>CXL / KV tiering</td>
+<td>CXL 内存使 GPU 需求降低 87%，GPU 利用率提升 75%，每查询 CPU 利用率降低 40%</td>
+<td>KV 卸载</td>
+</tr>
+<tr>
+<td>2025-12-18</td>
+<td>Scaling Large MoE Models with Wide Expert Parallelism on NVL72</td>
+<td>NVIDIA 技术文章</td>
+<td>MoE / expert parallel</td>
+<td>重点落在 expert 路由、放置和跨 GPU 通信，而非单一算子</td>
+<td>MoE</td>
+</tr>
+<tr>
+<td>2026-01</td>
+<td>LongCat-Flash-Lite: Scaling Embeddings</td>
+<td>论文 (arXiv)</td>
+<td>轻量模型 Kernel Launch 瓶颈</td>
+<td>Extreme sparsity + large batch 使瓶颈从内存带宽转向 Kernel Launch Overhead</td>
+<td>算子下发</td>
+</tr>
+<tr>
+<td>2026-02</td>
+<td>llm-d v0.5: UCCL Backend for PD Transfer</td>
+<td>工程博客</td>
+<td>PD 分离网络传输</td>
+<td>Host-resident software transport 由 CPU 管理拥塞控制，网络压力下尾延迟恶化仅 7.1%（vs UCX 17.1%）</td>
+<td>PD 分离</td>
+</tr>
+<tr>
+<td>2026-03</td>
+<td>NVIDIA Vera CPU Delivers High Performance, Bandwidth, and Efficiency for AI Factories</td>
+<td>NVIDIA 技术文章</td>
+<td>机头 CPU 架构</td>
+<td>Vera 88 核 Olympus，1.2 TB/s 内存带宽，独立部署商业模式确立</td>
+<td>机头 CPU</td>
+</tr>
+<tr>
+<td>2026-03</td>
+<td>Characterizing CPU-Induced Slowdowns in Multi-GPU LLM Inference</td>
+<td>论文 (arXiv)</td>
+<td>CPU 竞争导致 Kernel Launch 延迟</td>
+<td>CPU Oversubscription 使 dequeue 延迟放大 19×；GPU 利用率可降至 70% 以下</td>
+<td>算子下发</td>
+</tr>
+<tr>
+<td>2026-03</td>
+<td>Speculating Experts Accelerates Inference for Mixture-of-Experts</td>
+<td>论文 (arXiv)</td>
+<td>MoE 专家权重预取</td>
+<td>利用内部表示推测未来专家，重叠 CPU-GPU 传输与计算，TPOT 降低 14%</td>
+<td>MoE</td>
+</tr>
+<tr>
+<td>2026-03</td>
+<td>ScoutAttention: Efficient KV Cache Offloading via Layer-Ahead CPU Pre-computation</td>
+<td>论文 (arXiv)</td>
+<td>协同式 GPU-CPU Attention</td>
+<td>CPU 提前一层预计算 Attention，异步召回，精度损失 &lt; 2.4%，加速 2.1×</td>
+<td>KV 卸载</td>
+</tr>
+<tr>
+<td>2026-03</td>
+<td>Disaggregated Serving in TensorRT-LLM</td>
+<td>厂商技术博客</td>
+<td>PD 分离生产实践</td>
+<td>分离上下文与生成阶段以消除干扰；KV Cache Block 跨节点传输成为关键路径</td>
+<td>PD 分离</td>
+</tr>
+<tr>
+<td>2026-03</td>
+<td>Deploying Disaggregated LLM Inference on Kubernetes</td>
+<td>NVIDIA 技术文章</td>
+<td>Disaggregated serving</td>
+<td>ingress-router、prefill worker、decode worker 解耦部署</td>
+<td>算子下发</td>
+</tr>
+<tr>
+<td>2026-03</td>
+<td>Enhancing Distributed Inference with NIXL</td>
+<td>NVIDIA 技术文章</td>
+<td>transfer dispatch</td>
+<td>NIXL 统一 RDMA、NVLink、TCP sockets、NVMe-oF 等数据通路</td>
+<td>算子下发</td>
+</tr>
+<tr>
+<td>2026-03</td>
+<td>What Actually Bottlenecks LLM Inference on Modern GPUs</td>
+<td>工程博客</td>
+<td>Kernel Launch 税（量化小模型）</td>
+<td>301 次 Kernel Launch 中纯驱动开销占 750 μs；IQ4 量化+L2 Pinning 后内存墙消失，调度墙凸显</td>
+<td>算子下发</td>
+</tr>
+<tr>
+<td>2026-04</td>
+<td>Event Tensor: Dynamic Megakernels for LLM Serving</td>
+<td>论文 (MLSys 审稿)</td>
+<td>持久化 Kernel 消除 Launch 开销</td>
+<td>将动态形状与数据依赖编码为 Tile 依赖图，生成 Persistent Kernel</td>
+<td>算子下发</td>
+</tr>
+<tr>
+<td>2026-04</td>
+<td>FluxMoE: Decoupling Expert Residency for High-Performance MoE Serving</td>
+<td>论文 (arXiv)</td>
+<td>MoE 专家动态驻留</td>
+<td>解耦逻辑专家身份与物理驻留，动态流式化参数，无需依赖路由预测</td>
+<td>MoE</td>
+</tr>
+<tr>
+<td>2026-04-17</td>
+<td>Full-Stack Optimizations for Agentic Inference with NVIDIA Dynamo</td>
+<td>NVIDIA 技术文章</td>
+<td>Agentic inference / KV lifecycle</td>
+<td>85%-97% hit、97.2% aggregate hit、11.7x read/write ratio</td>
+<td>KV 卸载</td>
+</tr>
+<tr>
+<td>2026-04-11</td>
+<td>Kimi Introduces Agent Swarm</td>
+<td>Kimi 官方博客</td>
+<td>Multi-agent fan-out</td>
+<td>up to 100 sub-agents working in parallel</td>
+<td>Workload 反推</td>
+</tr>
+<tr>
+<td>2026-04-29</td>
+<td>火山引擎 Mobile Use Agent 全新升级</td>
+<td>火山引擎官方文章</td>
+<td>Mobile GUI agent</td>
+<td>基于云手机底座与豆包视觉模型构建 enterprise Android agent</td>
+<td>Workload 反推</td>
+</tr>
+<tr>
+<td>2026-03</td>
+<td>NVIDIA Vera CPU: Performance compared to AMD and Intel x86 chips</td>
+<td>产业评测</td>
+<td>机头 CPU 横向对比</td>
+<td>Vera sandbox 性能 1.5× 于 x86；Redpanda cross-core 吞吐 +73%；64 核后持续扩展</td>
+<td>机头 CPU</td>
+</tr>
+</tbody>
+</table>
+<hr>
+<h2 id="图表附录">图表附录 </h2>
+<h3 id="图-1nvidia-vera-rubin-六芯片协同架构">图 1：NVIDIA Vera Rubin 六芯片协同架构 </h3>
+<img src="assets/nvidia-vera-rubin-6chips.png" alt="NVIDIA Vera Rubin 六芯片架构" width="760">
+<blockquote>
+<p><strong>图：</strong> Vera Rubin 平台采用"极端协同设计"，将 Vera CPU、Rubin GPU、NVLink 6 Switch、ConnectX-9、BlueField-4 DPU 与 Spectrum-6 以太网交换机构建为统一系统。Vera CPU 作为编排与内存中枢，直接决定 Agentic 工作流的延迟与 GPU 利用率。来源：NVIDIA GTC 2026 / StorageReview。</p>
+</blockquote>
+<h3 id="图-2bluefield-4-dpu--卸载网络-存储与安全以释放-vera-cpu">图 2：BlueField-4 DPU — 卸载网络、存储与安全以释放 Vera CPU </h3>
+<img src="assets/nvidia-bluefield4.png" alt="BlueField-4 DPU 架构" width="760">
+<blockquote>
+<p><strong>图：</strong> BlueField-4 集成 64 核心 CPU 与 ConnectX-9 SuperNIC，将网络、存储和安全处理从 Vera CPU 与 Rubin GPU 上卸载，使机头 CPU 能专注于 Agentic 编排与 Kernel 调度。来源：NVIDIA GTC 2026 / StorageReview。</p>
+</blockquote>
+<h3 id="图-3agentic-inference-kv-读写比--状态保留成为核心">图 3：Agentic Inference KV 读写比 — 状态保留成为核心 </h3>
+<img src="assets/nvidia-dynamo-agentic-kv-readwrite-2026.webp" alt="Agentic inference KV 读写曲线" width="760">
+<blockquote>
+<p><strong>图：</strong> NVIDIA Dynamo 给出的 agentic inference KV 读写曲线，read/write ratio 高达 11.7x，说明系统价值重心从"写新 KV"转向"保留、路由和预取旧状态"。来源：NVIDIA, 2026-04-17。</p>
+</blockquote>
+<h3 id="图-4disaggregated-llm-inference-on-kubernetes--机头职责扩展">图 4：Disaggregated LLM Inference on Kubernetes — 机头职责扩展 </h3>
+<img src="assets/nvidia-k8s-disagg-serving-2026.webp" alt="K8s 解耦式推理拓扑" width="760">
+<blockquote>
+<p><strong>图：</strong> NVIDIA 在 Kubernetes 上展示的解耦式推理拓扑，host 侧职责从"单机发命令"扩展为 router + stage scheduling + transfer orchestration。来源：NVIDIA, 2026-03-23。</p>
+</blockquote>
+<h3 id="图-5cpu-gpu-统一内存地址空间--kv-温热层基础">图 5：CPU-GPU 统一内存地址空间 — KV 温热层基础 </h3>
+<img src="assets/cpu-gpu-unified-memory.webp" alt="CPU-GPU 统一地址空间" width="760">
+<blockquote>
+<p><strong>图：</strong> CPU 与 GPU 通过高带宽一致性互连共享地址空间，使 host memory 更适合承担 KV 的 overflow / staging / warm tier。来源：NVIDIA, 2025-09-05。</p>
+</blockquote>
+<h3 id="图-6wide-expert-parallelism--moe-跨设备组织方式">图 6：Wide Expert Parallelism — MoE 跨设备组织方式 </h3>
+<img src="assets/nvidia-wide-ep-moe-2025.webp" alt="Wide expert parallelism" width="760">
+<blockquote>
+<p><strong>图：</strong> NVIDIA wide expert parallelism 示意图，强调 MoE 推理的关键已经扩展到 expert 路由、并行放置和通信拓扑。来源：NVIDIA, 2025-12-18。</p>
+</blockquote>
+<hr>
+<h2 id="来源列表">来源列表 </h2>
+<h3 id="学术论文与预印本">学术论文与预印本 </h3>
+<ol>
+<li>Raj, R., et al. "Towards Understanding, Analyzing, and Optimizing Agentic AI Execution: A CPU-Centric Perspective." arXiv:2511.00739, v3 (Apr 2026). <a href="https://arxiv.org/abs/2511.00739">https://arxiv.org/abs/2511.00739</a></li>
+<li>"Characterizing CPU-Induced Slowdowns in Multi-GPU LLM Inference." arXiv:2603.22774 (Mar 2026). <a href="https://arxiv.org/abs/2603.22774">https://arxiv.org/abs/2603.22774</a></li>
+<li>"What Actually Bottlenecks LLM Inference on Modern GPUs." <a href="http://AI.rs">AI.rs</a> (Mar 2026). <a href="https://ai.rs/ai-developer/memory-wall-disappears-llm-inference-bottlenecks">https://ai.rs/ai-developer/memory-wall-disappears-llm-inference-bottlenecks</a></li>
+<li>"Event Tensor: Dynamic Megakernels for LLM Serving." Under review at MLSys (Apr 2026). <a href="https://arxiv.org/abs/2604.13327">https://arxiv.org/abs/2604.13327</a></li>
+<li>Huang, Y., et al. "NOSA: Native and Offloadable Sparse Attention." arXiv:2510.13602 (Oct 2025). <a href="https://arxiv.org/abs/2510.13602">https://arxiv.org/abs/2510.13602</a></li>
+<li>Zhang, Q., et al. "ScoutAttention: Efficient KV Cache Offloading via Layer-Ahead CPU Pre-computation." arXiv:2603.27138 (Mar 2026). <a href="https://arxiv.org/abs/2603.27138">https://arxiv.org/abs/2603.27138</a></li>
+<li>Madan, V., et al. "Speculating Experts Accelerates Inference for Mixture-of-Experts." arXiv:2603.19289 (Mar 2026). <a href="https://arxiv.org/abs/2603.19289">https://arxiv.org/abs/2603.19289</a></li>
+<li>"FluxMoE: Decoupling Expert Residency for High-Performance MoE Serving." arXiv:2604.02715 (Apr 2026). <a href="https://arxiv.org/abs/2604.02715">https://arxiv.org/abs/2604.02715</a></li>
+<li>"CoMEM: A Decoupled Agent Framework with Asynchronous Memory Compression." OpenReview (2025). <a href="https://openreview.net/pdf?id=c7c6541f58ddaf647289d2523a9587312294301a">https://openreview.net/pdf?id=c7c6541f58ddaf647289d2523a9587312294301a</a></li>
+<li>"LongCat-Flash-Lite: Scaling Embeddings Outperforms Scaling Experts in Language Models." arXiv:2601.21204 (Jan 2026). <a href="https://arxiv.org/abs/2601.21204">https://arxiv.org/abs/2601.21204</a></li>
+<li>"FlashNorm: Fast Normalization for Transformers." arXiv:2407.09577v4 (Apr 2026). <a href="https://arxiv.org/abs/2407.09577">https://arxiv.org/abs/2407.09577</a></li>
+</ol>
+<h3 id="厂商官方资料">厂商官方资料 </h3>
+<ol start="12">
+<li>"NVIDIA Vera CPU Delivers High Performance, Bandwidth, and Efficiency for AI Factories." NVIDIA Developer Blog (Mar 2026). <a href="https://developer.nvidia.com/blog/nvidia-vera-cpu-delivers-high-performance-bandwidth-and-efficiency-for-ai-factories/">https://developer.nvidia.com/blog/nvidia-vera-cpu-delivers-high-performance-bandwidth-and-efficiency-for-ai-factories/</a></li>
+<li>"NVIDIA Vera CPU Enters Full Production." Data Center Dynamics (Mar 2026). <a href="https://www.datacenterdynamics.com/en/news/nvidia-vera-cpu-enters-full-production-pitched-at-agentic-ai-workloads/">https://www.datacenterdynamics.com/en/news/nvidia-vera-cpu-enters-full-production-pitched-at-agentic-ai-workloads/</a></li>
+<li>"NVIDIA Launches Vera Rubin Architecture at CES 2026." StorageReview (Jan 2026). <a href="https://www.storagereview.com/news/nvidia-launches-vera-rubin-architecture-at-ces-2026-the-vr-nvl72-rack">https://www.storagereview.com/news/nvidia-launches-vera-rubin-architecture-at-ces-2026-the-vr-nvl72-rack</a></li>
+<li>"Accelerate Large-Scale LLM Inference and KV Cache Offload with CPU-GPU Memory Sharing." NVIDIA Developer Blog (Sep 2025). <a href="https://developer.nvidia.com/blog/accelerate-large-scale-llm-inference-and-kv-cache-offload-with-cpu-gpu-memory-sharing/">https://developer.nvidia.com/blog/accelerate-large-scale-llm-inference-and-kv-cache-offload-with-cpu-gpu-memory-sharing/</a></li>
+<li>"How to Reduce KV Cache Bottlenecks with NVIDIA Dynamo." NVIDIA Developer Blog (Sep 2025). <a href="https://developer.nvidia.com/blog/how-to-reduce-kv-cache-bottlenecks-with-nvidia-dynamo/">https://developer.nvidia.com/blog/how-to-reduce-kv-cache-bottlenecks-with-nvidia-dynamo/</a></li>
+<li>"Full-Stack Optimizations for Agentic Inference with NVIDIA Dynamo." NVIDIA Developer Blog (Apr 2026). <a href="https://developer.nvidia.com/blog/full-stack-optimizations-for-agentic-inference-with-nvidia-dynamo/">https://developer.nvidia.com/blog/full-stack-optimizations-for-agentic-inference-with-nvidia-dynamo/</a></li>
+<li>"Deploying Disaggregated LLM Inference Workloads on Kubernetes." NVIDIA Developer Blog (Mar 2026). <a href="https://developer.nvidia.com/blog/deploying-disaggregated-llm-inference-workloads-on-kubernetes/">https://developer.nvidia.com/blog/deploying-disaggregated-llm-inference-workloads-on-kubernetes/</a></li>
+<li>"Enhancing Distributed Inference Performance with the NVIDIA Inference Transfer Library." NVIDIA Developer Blog (Mar 2026). <a href="https://developer.nvidia.com/blog/enhancing-distributed-inference-performance-with-the-nvidia-inference-transfer-library/">https://developer.nvidia.com/blog/enhancing-distributed-inference-performance-with-the-nvidia-inference-transfer-library/</a></li>
+<li>"Scaling Large MoE Models with Wide Expert Parallelism on NVL72." NVIDIA Developer Blog (Dec 2025). <a href="https://developer.nvidia.com/blog/scaling-large-moe-models-with-wide-expert-parallelism-on-nvl72-rack-scale-systems/">https://developer.nvidia.com/blog/scaling-large-moe-models-with-wide-expert-parallelism-on-nvl72-rack-scale-systems/</a></li>
+<li>"Disaggregated Serving in TensorRT-LLM." NVIDIA GitHub / TensorRT-LLM Blog (Mar 2026). <a href="https://nvidia.github.io/TensorRT-LLM/blogs/tech_blog/blog5_Disaggregated_Serving_in_TensorRT-LLM.html">https://nvidia.github.io/TensorRT-LLM/blogs/tech_blog/blog5_Disaggregated_Serving_in_TensorRT-LLM.html</a></li>
+</ol>
+<h3 id="产业与市场分析">产业与市场分析 </h3>
+<ol start="22">
+<li>"How Agentic AI Is Reshaping the CPU:GPU Ratio." TrendForce Insights (Apr 2026). <a href="https://insights.trendforce.com/p/agentic-ai-cpu-gpu">https://insights.trendforce.com/p/agentic-ai-cpu-gpu</a></li>
+<li>"The Forgotten Chip: CPUs the New Bottleneck of the Agentic AI Era." Uncover Alpha (Feb 2026). <a href="https://www.uncoveralpha.com/p/the-forgotten-chip-cpus-the-new-bottleneck">https://www.uncoveralpha.com/p/the-forgotten-chip-cpus-the-new-bottleneck</a></li>
+<li>"Secret Agent CPU." The Diligence Stack / Ben Bajarin (Mar 2026). <a href="https://thediligencestack.com/p/secret-agent-cpu">https://thediligencestack.com/p/secret-agent-cpu</a></li>
+<li>"NVIDIA Vera CPU: Performance compared to AMD and Intel x86 chips." <a href="http://Digit.in">Digit.in</a> (Mar 2026). <a href="https://www.digit.in/features/general/nvidia-vera-cpu-performance-compared-to-amd-and-intel-x86-chips.html">https://www.digit.in/features/general/nvidia-vera-cpu-performance-compared-to-amd-and-intel-x86-chips.html</a></li>
+<li>"NVIDIA’s Vera CPU in Detail." ServeTheHome (Mar 2026). <a href="https://www.servethehome.com/nvidias-vera-cpu-in-detail-high-perf-chip-takes-aim-at-broader-ai-server-market/2/">https://www.servethehome.com/nvidias-vera-cpu-in-detail-high-perf-chip-takes-aim-at-broader-ai-server-market/2/</a></li>
+</ol>
+<h3 id="开源项目与工程实践">开源项目与工程实践 </h3>
+<ol start="27">
+<li>"vLLM V1 Alpha Release." vLLM Blog (Jan 2025). <a href="https://openlm.ai/vllm-v1/">https://openlm.ai/vllm-v1/</a></li>
+<li>"vLLM Roadmap Q1 2026." GitHub Issue #32455 (Jan 2026). <a href="https://github.com/vllm-project/vllm/issues/32455">https://github.com/vllm-project/vllm/issues/32455</a></li>
+<li>"Disaggregated Prefilling (experimental)." vLLM Documentation. <a href="https://docs.vllm.ai/en/latest/features/disagg_prefill/">https://docs.vllm.ai/en/latest/features/disagg_prefill/</a></li>
+<li>"llm-d 0.5: Sustaining Performance at Scale." llm-d Blog (Feb 2026). <a href="https://llm-d.ai/blog/llm-d-v0.5-sustaining-performance-at-scale">https://llm-d.ai/blog/llm-d-v0.5-sustaining-performance-at-scale</a></li>
+<li>"Prefill-decode disaggregation." BentoML LLM Inference Handbook. <a href="https://bentoml.com/llm/inference-optimization/prefill-decode-disaggregation">https://bentoml.com/llm/inference-optimization/prefill-decode-disaggregation</a></li>
+<li>"Disaggregated Inference: 18 Months Later." Hao AI Lab (Nov 2025). <a href="https://haoailab.com/blogs/distserve-retro">https://haoailab.com/blogs/distserve-retro</a></li>
+</ol>
+<h3 id="真实产品-workload-参考">真实产品 Workload 参考 </h3>
+<ol start="33">
+<li>"Kimi Introduces Agent Swarm: Let 100 AI Agents Work for You." Kimi Blog (Apr 2026). <a href="https://www.kimi.com/blog/agent-swarm.html">https://www.kimi.com/blog/agent-swarm.html</a></li>
+<li>"不止对话，更能执行！火山引擎 Mobile Use Agent 全新升级." 火山引擎 (Apr 2026). <a href="https://developer.volcengine.com/articles/7628489608359395369">https://developer.volcengine.com/articles/7628489608359395369</a></li>
+<li>"openclaw/openclaw README." GitHub (release window 2026-04-14). <a href="https://github.com/openclaw/openclaw">https://github.com/openclaw/openclaw</a></li>
+<li>"Subagents." Anthropic Official Documentation (current, no exposed publish date; supplementary only). <a href="https://docs.anthropic.com/en/docs/claude-code/sub-agents">https://docs.anthropic.com/en/docs/claude-code/sub-agents</a></li>
+</ol>
+<h3 id="技术方案与专利">技术方案与专利 </h3>
+<ol start="37">
+<li>"How CXL Transforms RAG and KV Cache Performance." Astera Labs (Nov 2025). <a href="https://www.asteralabs.com/breaking-through-the-memory-wall-how-cxl-transforms-rag-and-kv-cache-performance/">https://www.asteralabs.com/breaking-through-the-memory-wall-how-cxl-transforms-rag-and-kv-cache-performance/</a></li>
+<li>"KV cache offloading — CPU RAM vs. storage." NetApp Community (Nov 2025). <a href="https://community.netapp.com/t5/Tech-ONTAP-Blogs/KV-cache-offloading-CPU-RAM-vs-storage/ba-p/464463">https://community.netapp.com/t5/Tech-ONTAP-Blogs/KV-cache-offloading-CPU-RAM-vs-storage/ba-p/464463</a></li>
+<li>"MoE inference cost cuts: 30+ patents analyzed." PatSnap (Apr 2026). <a href="https://www.patsnap.com/resources/blog/articles/moe-inference-cost-cuts-30-patents-analyzed/">https://www.patsnap.com/resources/blog/articles/moe-inference-cost-cuts-30-patents-analyzed/</a></li>
+<li>"AI Inference Optimization Techniques (2025-2026)." Zylos Research (Jan 2026). <a href="https://zylos.ai/research/2026-01-11-ai-inference-optimization">https://zylos.ai/research/2026-01-11-ai-inference-optimization</a></li>
+<li>"异步并行推理方法专利 (CN)." 中国科学技术大学 (2025). 见 PatSnap MoE 专利分析引用。</li>
+</ol>
+<hr>
+<blockquote>
+<p><strong>免责声明：</strong> 本洞察基于 2025-07-01 至 2026-04-24 期间公开发表的技术论文、厂商公告、开源项目演进与产业分析整理而成。涉及尚未量产的产品（如 NVIDIA Vera Rubin 大规模部署、Intel Xeon 7 等）时间表存在延期风险；性能数据来源于论文、厂商受控测试或第三方早期 benchmark（如 Redpanda），实际部署收益取决于具体工作负载与系统配置。Anthropic Subagents 文档因未暴露公开日期，仅作为补充参考而非日期边界内主证据。</p>
+</blockquote>
+
+      </div>
+      
+      
+    
+    
+    
+    
+    
+    
+  
+    </body></html>
