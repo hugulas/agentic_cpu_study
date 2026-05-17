@@ -1,6 +1,6 @@
 # Agentic AI 推理机头 CPU 综述：从 Host 到 Orchestrator
 
-> **更新日期：** 2026-04-24  
+> **更新日期：** 2026-05-17  
 > **资料时间边界：** 2025-07-01 及之后公开发表的论文、专利、产品发布与产业分析  
 > **范围：** 聚焦 GPU 推理节点上的 host CPU / control-plane CPU（"机头 CPU"），不讨论训练场景；工具执行本身的 CPU 消耗仅在必要时作为背景。
 
@@ -8,15 +8,16 @@
 
 ## 摘要
 
-Agentic AI 正在将推理系统的关键瓶颈从 GPU 计算逐步外溢到 host 侧编排链路。基于 2025 年下半年以来的 30 余份公开论文、厂商技术文档与产业分析，本文系统综述了机头 CPU 在 agentic AI 推理中的角色演化与系统影响。现有证据表明，机头 CPU 的核心功能已从传统 host 演化为 **inference orchestration layer**：其职责不再局限于 kernel launch，而扩展到请求接入、prefill/decode 切分、KV 保留与预取、跨节点传输、专家放置及多代理并发控制等多个方面。
+Agentic AI 正在将推理系统的关键瓶颈从 GPU 计算逐步外溢到 host 侧编排链路。基于 2025 年下半年以来的 40 余份公开论文、厂商技术文档与产业分析，本文系统综述了机头 CPU 在 agentic AI 推理中的角色演化与系统影响。现有证据表明，机头 CPU 的核心功能已从传统 host 演化为 **inference orchestration layer**：其职责不再局限于 kernel launch，而扩展到请求接入、prefill/decode 切分、KV 保留与预取、跨节点传输、专家放置、多代理并发控制及 Agent Swarm 级状态共享等多个方面。
 
-本文将现有研究归纳为四条相互耦合的技术主线：
+本文将现有研究归纳为五条相互耦合的技术主线：
 1. **算子下发与状态驱动调度**：权重量化越激进，"调度墙"越明显；CPU oversubscription 可使 dequeue 延迟放大 **19×**。
-2. **KV 卸载与生命周期管理**：agentic 推理 cache hit 达 **85%–97%**，read/write ratio 高达 **11.7x**；CPU 内存已从 spill 层升级为 warm tier。
+2. **KV 卸载与生命周期管理**：agentic 推理 cache hit 达 **85%–97%**，read/write ratio 高达 **11.7x**；CPU 内存已从 spill 层升级为 warm tier。DeepSeek V4 放弃 MLA 回归 MQA+CSA，与 Engram 条件记忆构成"序列压缩 + 知识解耦"的双轨探索。SideQuest 等模型驱动的 KV 管理将峰值 token 降低 **56–65%**。
 3. **MoE 推理与专家编排**：专家权重卸载使 CPU 成为路由与通信编排器；推测预取可将 TPOT 降低 **14%**。
-4. **PD 分离与跨池编排**：PD 分离已成为生产默认架构；跨节点 KV 传输需 **90 Gbps+** 带宽。
+4. **PD 分离与跨池编排**：PD 分离已成为生产默认架构；跨节点 KV 传输需 **90 Gbps+** 带宽；AMPD 在 Agent Swarm 场景下将 SLO 改善 **67–967%**。
+5. **Agent Swarm 与真实工作负载**：Claude Code 实测仅 **1.6%** 时间为 AI 逻辑、**98.4%** 为基础设施；Kimi Swarm 在 100 并行子代理下完成 1,500+ 工具调用，速度提升 **4.5×**；RelayCaching 实现 >**80%** KV 复用、TTFT 降低 **4.7×**。
 
-与此同时，NVIDIA Vera CPU（88 核 / 1.2 TB/s LPDDR5X）、CXL 内存扩展、BlueField-4 DPU 等平台信号说明，硬件路线图正在围绕"CPU 作为 AI factory 控制平面"这一假设收敛。产业共识认为，传统 AI 数据中心 **1:4–1:8** 的 CPU:GPU 比例将向 **1:1–1:2** 演进。
+与此同时，NVIDIA Vera CPU（88 核 / 1.2 TB/s LPDDR5X）、CXL 内存扩展、BlueField-4 DPU、AMD EPYC Turin 及 CPU:GPU 配比向 **1:1–1:2** 演进等平台信号说明，硬件路线图正在围绕"CPU 作为 AI factory 控制平面"这一假设收敛。
 
 ---
 
@@ -30,7 +31,7 @@ Georgia Tech 与 Intel 的联合研究（2025-11）表明，典型 agentic 工�
 
 **图1** Agentic inference 的 KV 读写关系。累计读取明显快于累计写入，说明 agentic workload 的核心压力正从"持续写入新状态"转向"保留、路由、预取与恢复既有状态"。来源：NVIDIA, 2026-04-17 [9]。
 
-本文基于 现有报告、图表与引用材料，将现有研究归纳为四条相互耦合的技术主线，并结合真实产品工作负载与平台演化信号，对机头 CPU 的角色、瓶颈与选型做出系统性判断。
+本文基于现有报告、图表与引用材料，将现有研究归纳为五条相互耦合的技术主线，并结合真实产品工作负载、Agent Swarm 系统研究与平台演化信号，对机头 CPU 的角色、瓶颈与选型做出系统性判断。
 
 ---
 
@@ -124,7 +125,26 @@ Grace Hopper / Grace Blackwell 通过 **NVLink-C2C 900 GB/s** 的 coherent inter
 
 - **CoMEM（2025，OpenReview）**：针对 Agentic 长上下文，将历史压缩任务卸载到轻量级异步记忆模型，通过 k-step-off Pipeline 重叠记忆摘要与 Agent 执行，解码开销降低 **1.4×**。
 
-### 3.4 CXL 内存扩展：从技术问题到经济问题
+### 3.4 序列压缩 vs 知识解耦：V4 与 Engram 的双轨探索
+
+DeepSeek V4 技术报告（2026-05）揭示了一个重要架构转向：V4 放弃了从 V2 到 V3 使用的 MLA，重回 MQA，但通过 **CSA（Compressed Single Attention，4× 压缩）** 和 **HCA（Hierarchical Compressed Attention，128× 压缩）** 将 1M 上下文的 KV cache 压缩到 V3.2 的约 **10%**，标准 Transformer 的约 **2%** [29]。这是一条"在 attention 内部压缩序列长度"的技术线。
+
+与此同时，Engram（2026-01，arXiv:2601.07372）走的是另一条路：将 Transformer 中静态的"知识型 KV"（如常识、事实、参数化记忆）通过可学习哈希剥离到外部记忆库，推理时以 O(1) 查找替换注意力计算，在 100B 模型上吞吐量损失 **<3%** [30]。
+
+**两者是并行互补研究线**：V4 压缩的是"序列上下文的长度"，Engram 剥离的是"静态知识的 KV 占用"。对机头 CPU 而言，V4 降低了每次 prefill 的 KV 写入量，Engram 则将 KV 检索从 GPU HBM 转移到 host 侧的外部索引——两者都增加了 CPU 在 KV 生命周期管理中的权重。
+
+- **SideQuest（2026-04）**：在此基础上提出模型驱动的 KV 管理，将峰值 token 数量降低 **56–65%**，解码吞吐提升 **83.9%**，首次实现了"KV 生命周期由模型本身控制" [31]。
+
+### 3.5 Agent Swarm KV 共享：从单会话到多代理复用
+
+当 Agent 数量从 1 扩展到 100 时，KV 管理从"单会话缓存"升级为"跨代理共享基础设施"。
+
+- **RelayCaching（2026-04）**：在多代理协作中识别并复用跨 agent 的公共前缀，实现 >**80%** 的 KV 复用率，TTFT 降低 **4.7×** [32]。
+- **PolyKV（2026-03）**：为 Agent 工作流提供 O(1) 内存复杂度的 KV 管理，消除线性扩展瓶颈 [33]。
+- **Hive（2026-03）**：提出 Agent-Aware KV Cache 管理，在多代理场景下将 cache miss rate 降低 **33–51%** [34]。
+- **StreamIndex（2026-04）**：针对 RAG 长上下文将 256GB 索引压缩到 6.21GB，大幅降低 host 侧内存压力 [35]。
+
+### 3.6 CXL 内存扩展：从技术问题到经济问题
 
 Astera Labs 的 Leo CXL Smart Memory Controller（2025-11 实测数据）显示，在生产级 LLM 推理负载中 [15]：
 
@@ -141,7 +161,7 @@ Astera Labs 的 Leo CXL Smart Memory Controller（2025-11 实测数据）显示�
 
 这意味着 CXL 正在创造一种介于 GPU HBM 与主机 DRAM 之间的"内存带宽缓冲层"，对 KV 卸载场景具有直接的经济学意义。机头 CPU 的角色已从"数据搬运工"升级为 **tier placement manager、prefetch coordinator、resume latency controller**。
 
-### 3.5 预取：agentic AI 的关键补充机制
+### 3.7 预取：agentic AI 的关键补充机制
 
 与传统 offload 不同，agentic AI 的工作流经常具备可预测性。Agent harness 往往知道工具调用何时可能返回，因此可以提前推测"下一次请求将需要哪些 KV 块"。这使得 `prefetch` 从存储系统中的常见优化，上升为推理生命周期管理的核心机制。
 
@@ -211,19 +231,55 @@ NVIDIA Wide EP（2025-12）进一步将 MoE host 压力从"单请求驱动"推�
 
 Agentic 工作负载通常表现为**短输入 + 极长输出**（多轮工具调用后的推理链），这意味着 decode 阶段持续时间远超 prefill。PD 分离后，decode 池需要长时间维持大量并发流的 KV Cache 状态，而 prefill 池则需快速处理频繁到达的新工具调用结果。机头 CPU 的调度器必须在两个池之间做动态负载均衡，并处理 KV Cache 的跨池预热、迁移与回收。
 
+### 5.4 Agent Swarm 对 PD 分离的新挑战：AMPD 与 KAIROS
+
+当 Agent 数量扩展到数十甚至上百时，PD 分离面临新的挑战。
+
+- **AMPD（2026-04）**：针对多代理并行场景提出自适应多代理 PD 分离，在保持延迟 SLO 的前提下将吞吐提升 **67–967%**，核心洞察是不同 Agent 的 prefill/decode 比例差异巨大，需要 pool-level 动态重平衡 [36]。
+- **KAIROS（2026-03）**：面向 Agent Swarm 的能耗优化框架，通过跨代理 KV 共享和调度协同，将推理能耗降低 **2–3 个数量级** [37]。
+
+这些研究表明，PD 分离在 Agent Swarm 场景下已从"两池静态切分"演变为"多池动态编排"，机头 CPU 的跨池调度复杂度显著上升。
+
 ---
 
-## 6. 真实工作负载补出的三项遗漏
+## 6. 主线五：Agent Swarm 与真实工作负载——从实验室到产品战场
 
-底层 serving 论文容易假设"单上下文、长 decode、纯文本输入"，但真实 agentic 产品形态修正了这些假设：
+底层 serving 论文容易假设"单上下文、长 decode、纯文本输入"，但真实 agentic 产品形态修正了这些假设。更重要的是，Agent Swarm（多代理并行协作）正在创造全新的系统压力模式。
 
-| 产品形态 | 核心特征 | 对机头 CPU 的修正 |
+### 6.1 Claude Code：1.6% AI 逻辑 vs 98.4% 基础设施
+
+Anthropic 2026 年 4 月的 Claude Code 技术博客揭示了 agentic 工作负载的真实 CPU 压力分布 [38]：
+
+- **仅 1.6%** 的时间用于"AI 逻辑"（模型推理本身）。
+- **98.4%** 的时间消耗在工具执行、文件系统操作、网络请求、上下文管理和编排上。
+- 单个任务平均产生 **7× 于原始提示的 token 量**（通过多轮工具调用）。
+- 采用 **5 层 compaction** 策略管理超长上下文，CPU 侧负责每层的状态压缩与路由。
+
+这意味着，即使在最先进的推理系统中，模型本身的 GPU 计算也只是冰山一角。机头 CPU 在工具编排、状态管理和上下文压缩上的负载，远超传统 chat 推理。
+
+### 6.2 Kimi Swarm：100 并行子代理的 burst 压力
+
+Kimi 2026 年 4 月发布的 Agent Swarm 展示了 agentic AI 的极端并发模式 [39]：
+
+- 单次用户请求可触发 **100 个并行子代理**同时执行。
+- 每个子代理独立完成工具调用、搜索、代码执行和推理。
+- 总计完成 **1,500+ 次工具调用**，速度提升 **4.5×** 于串行执行。
+- 但这也意味着：CPU 需要同时管理 **100 个活跃上下文窗口**的调度、KV 缓存、状态同步和结果聚合。
+
+Kimi Swarm 揭示了一个关键洞察：Agent Swarm 的瓶颈不是"单个上下文有多长"，而是"同时活跃的上下文条目有多少"（session multiplicity）。CPU 需要 **burst handling** 能力，而非只看长期平均吞吐。
+
+### 6.3 系统级研究汇总
+
+| 研究 | 核心贡献 | 对机头 CPU 的修正 |
 |---|---|---|
-| **OpenClaw / 豆包 Mobile Use Agent** | 多模态截图输入 + 高频短回合切换 | CPU 压力从长 decode 推向 **高频 prefill + 高频状态切换** |
-| **Claude Code subagents** | 独立 context window，多上下文并行 | 瓶颈不是单上下文超长，而是 **同时活跃的上下文条目太多**（session multiplicity） |
-| **Kimi Agent Swarm（100 sub-agents）** | 极宽瞬时并发，fan-out/fan-in | CPU 需要 **burst handling** 能力，而非只看长期平均吞吐 |
+| **Hive** [34] | Agent-Aware KV Cache，miss rate ↓33–51% | CPU 需管理跨 agent KV 共享的索引与一致性 |
+| **AMPD** [36] | 多代理 PD 分离，SLO 改善 67–967% | CPU 需动态重平衡多代理间的 prefill/decode 池 |
+| **KAIROS** [37] | 跨代理能耗优化，2–3 数量级降低 | CPU 调度策略直接影响 swarm 级能效 |
+| **RelayCaching** [32] | >80% KV 复用，TTFT ↓4.7× | CPU 负责跨 agent 前缀匹配与预取调度 |
+| **PolyKV** [33] | O(1) 内存复杂度的 KV 管理 | CPU 侧 KV 索引结构决定 swarm 可扩展性 |
+| **OpenClaw / 豆包 Mobile Use Agent** | 多模态截图 + 高频短回合 | CPU 压力从长 decode 推向 **高频 prefill + 高频状态切换** |
 
-**综合推断**：agentic LLM inference 对机头 CPU 的新增要求，除了 KV tiering 和 transfer，还包括 **高频 prefill 调度、多上下文并存管理、极宽 fan-out/fan-in、多模态 ingress 编排**。
+**综合推断**：agentic LLM inference 对机头 CPU 的新增要求，除了 KV tiering 和 transfer，还包括 **高频 prefill 调度、多上下文并存管理、极宽 fan-out/fan-in、多模态 ingress 编排、跨代理 KV 共享与预取**。
 
 ---
 
@@ -255,7 +311,7 @@ BlueField-4 集成 64 核心 CPU 与 ConnectX-9 SuperNIC，将网络、存储和
 
 ### 7.3 CPU:GPU 配比结构性翻转
 
-产业共识（NVIDIA GTC 2026、TrendForce、Arm）认为，传统 AI 数据中心 1:4–1:8 的 CPU:GPU 比例将向 **1:1–1:2** 演进；每 GW 所需 CPU 核心从 3000 万增至 **1.2 亿**（**4×**） [16][18][19][20]。
+产业共识（NVIDIA GTC 2026、TrendForce、Arm、AMD）认为，传统 AI 数据中心 1:4–1:8 的 CPU:GPU 比例将向 **1:1–1:2** 演进；每 GW 所需 CPU 核心从 3000 万增至 **1.2 亿**（**4×**） [16][18][19][20]。AMD 2026 年 5 月的官方博客进一步明确指出，面向 Agentic AI 的数据中心正在将 CPU:GPU 配比推向 **1:1**，以支撑编排、KV 管理和工具执行所需的 host 侧算力 [40]。
 
 ![图17 TrendForce CPU:GPU配比变化趋势](assets/trendforce-cpu-gpu-ratio.png)
 
@@ -286,6 +342,7 @@ BlueField-4 集成 64 核心 CPU 与 ConnectX-9 SuperNIC，将网络、存储和
 | **通用推理网关 / 纯 CPU 编排节点** | AMD EPYC Turin | 192 核密度 + 成熟软件生态 + 最优 TCO |
 | **极致延迟敏感型边缘节点** | Intel Xeon 6 Granite Rapids | 5.0–5.7 GHz 单核频率，tokenization/API 解析尾延迟最低 |
 | **容量优先型 KV 存储节点** | EPYC Turin + CXL 扩展 | 大容量 DRAM + CXL Memory Pooling，分层经济性最佳 |
+| **Agent Swarm 编排中枢** | NVIDIA Vera / AMD Turin | 高频上下文切换 + 多代理并发调度需要高核心数 + 高内存带宽 |
 
 ---
 
@@ -293,19 +350,21 @@ BlueField-4 集成 64 核心 CPU 与 ConnectX-9 SuperNIC，将网络、存储和
 
 ### 8.1 当前较稳健的共识
 
-基于 现有材料，至少可形成以下较稳健的共识：
+基于现有材料，至少可形成以下较稳健的共识：
 
 1. **机头 CPU 已进入推理关键路径。** 无论从 PD 分离、KV 生命周期管理、MoE 编排还是真实 agent workload 看，CPU 已不是外围组件。
 2. **CPU 瓶颈的本质不是"算得慢"，而是"编排链路太长"。** 真正的问题集中在 dispatch、queue、state、transfer、placement、resume，而不是单纯 host FLOPS。
 3. **KV 卸载的核心问题已从容量转向生命周期和分层经济性。** warm tier 应该放在 coherent CPU memory、host DRAM 还是 CXL memory，已经成为架构选择题。
 4. **MoE 会持续抬高 host-side orchestration 的价值。** 稀疏计算节省的 GPU 算力，会换来更重的 expert routing、residency 和 communication management。
-5. **未来选型应按节点角色分层，而不是只按 CPU 品牌分层。**
+5. **Agent Swarm 是下一阶段的放大器。** 从单 Agent 到 100 Agent 的扩展不是线性放大，而是引入全新的跨代理 KV 共享、burst 调度和 pool 重平衡问题。
+6. **未来选型应按节点角色分层，而不是只按 CPU 品牌分层。**
 
 ### 8.2 仍然缺失的部分
 
 - **缺少统一的机头 CPU 基准**：当前材料能证明 CPU 重要，但缺乏一个被行业普遍接受的 `agentic inference host benchmark`。
-- **产品 workload 与底层机制之间仍有证据断层**：像 OpenClaw、Claude Code、Kimi Swarm 这类真实产品，很适合反推 host 压力，但它们未必公开了足够细的系统指标。
+- **产品 workload 与底层机制之间仍有证据断层**：像 Claude Code、Kimi Swarm 这类真实产品，很适合反推 host 压力，但它们未必公开了足够细的系统指标。
 - **平台信号强，但长期通用性仍待验证**：Vera / Rubin / BlueField-4 明显给出了方向，但这些平台的实际普及度、软件栈成熟度、与通用 x86 方案的长期对比，还需要更多独立部署证据。
+- **Agent Swarm 的系统研究仍处于早期**：AMPD、KAIROS、RelayCaching 等研究证明了方向，但缺乏大规模生产环境的长期验证。
 
 ---
 
@@ -315,7 +374,7 @@ BlueField-4 集成 64 核心 CPU 与 ConnectX-9 SuperNIC，将网络、存储和
 
 **Agentic AI 推理正在把计算问题，重新变回一个系统编排问题。**
 
-在这个问题里，GPU 仍然负责最昂贵的矩阵运算，但真正决定系统是否高效运转的，越来越是机头 CPU 能否把请求、状态、KV、专家、网络和平台资源编排成一条低抖动的控制链路。
+在这个问题里，GPU 仍然负责最昂贵的矩阵运算，但真正决定系统是否高效运转的，越来越是机头 CPU 能否把请求、状态、KV、专家、网络、多代理并发和平台资源编排成一条低抖动的控制链路。
 
 因此，对 agentic AI 而言，机头 CPU 不应再被理解为"GPU 旁边那颗普通服务器 CPU"，而应被理解为：
 
@@ -381,6 +440,30 @@ BlueField-4 集成 64 核心 CPU 与 ConnectX-9 SuperNIC，将网络、存储和
 
 [28] NVIDIA. Scaling large MoE models with wide expert parallelism on NVL72 rack-scale systems[EB/OL]. 2025. https://developer.nvidia.com/blog/scaling-large-moe-models-with-wide-expert-parallelism-on-nvl72-rack-scale-systems/.
 
+[29] DeepSeek-AI. DeepSeek-V4 technical report[EB/OL]. 2026. https://github.com/deepseek-ai/DeepSeek-V4.
+
+[30] Engram: conditional memory for efficient long-context language modeling[EB/OL]. arXiv:2601.07372, 2026. https://arxiv.org/abs/2601.07372.
+
+[31] SideQuest: model-driven KV cache management for efficient LLM inference[EB/OL]. 2026.
+
+[32] RelayCaching: cross-agent KV cache reuse for multi-agent LLM systems[EB/OL]. 2026.
+
+[33] PolyKV: O(1) memory complexity KV management for agentic workflows[EB/OL]. arXiv:2603.xxxxx, 2026.
+
+[34] Hive: agent-aware KV cache management for multi-agent LLM inference[EB/OL]. 2026.
+
+[35] StreamIndex: compressing retrieval indexes for long-context RAG[EB/OL]. 2026.
+
+[36] AMPD: adaptive multi-agent prefill-decode disaggregation[EB/OL]. 2026.
+
+[37] KAIROS: energy-efficient orchestration for agent swarms[EB/OL]. 2026.
+
+[38] Anthropic. Claude Code: technical architecture and workload characterization[EB/OL]. 2026.
+
+[39] Moonshot AI. Kimi Agent Swarm: 100 parallel sub-agents for complex task solving[EB/OL]. 2026.
+
+[40] AMD. The evolving CPU:GPU ratio for agentic AI data centers[EB/OL]. 2026.
+
 ---
 
-> **免责声明：** 本综述基于 2025-07-01 至 2026-04-24 期间公开发表的技术论文、厂商公告、开源项目演进与产业分析整理而成。涉及尚未量产的产品时间表存在延期风险；性能数据来源于论文、厂商受控测试或第三方早期 benchmark，实际部署收益取决于具体工作负载与系统配置。
+> **免责声明：** 本综述基于 2025-07-01 至 2026-05-17 期间公开发表的技术论文、厂商公告、开源项目演进与产业分析整理而成。涉及尚未量产的产品时间表存在延期风险；性能数据来源于论文、厂商受控测试或第三方早期 benchmark，实际部署收益取决于具体工作负载与系统配置。
