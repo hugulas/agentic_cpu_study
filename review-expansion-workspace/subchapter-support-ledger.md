@@ -11,7 +11,7 @@
 | Ch06 主线四 | done | — | 无变化 | 内容已充分 |
 | Ch07 真实工作负载 | **done** | SRC-15,16,17,18,19,20,21,22 | 补充 Claude Code 详细数据（1.6%/98.4%、7x token、五层压缩管道、三种隔离模式）；补充 Kimi Swarm 详细数据（100 agents、1,500 tools、4.5x）；新增 6.5 节系统级研究（Hive/RelayCaching/AMPD/KAIROS/PolyKV） | 已重建 |
 | Ch08 平台信号 | **done** | SRC-21 | 7.3 节补充 AMD 官方博客 CPU:GPU 1:1 信号 | 已重建 |
-| Ch09 讨论 | **done** | SRC-01,03,15,18 | 修正 8.3 节 Engram-V4 关系（从"集成"改为"双轨探索"）；新增共识 #6（Agent Swarm 第五维负载）；新增 8.4 节 Agent Swarm 研究空白 | 已重建 |
+| Ch09 讨论 | **done** | SRC-01,02,08,09,10,15,18,19,39 | 修正 8.3 节 Engram-V4 关系（从"集成"改为"双轨探索"）；新增共识 #6（Agent Swarm 第五维负载）；新增 8.4 节 Agent Swarm 研究空白；**新增 8.5 节"对 CPU 设计的启示"**，从带宽、页表/IOMMU、分层内存、预取、轻量变换五个维度归纳设计启示，并附 PDF 原文量化数据与图表支撑 | 已重建 |
 | Ch10 结论 | **done** | SRC-01,03,20 | 修正 Engram 表述；补充 Agent Swarm 作为第五驱动力；补充五条未来方向 | 已重建 |
 | Ch11 参考文献 | **done** | 全部新增来源 | 新增 12 条引用（Engram、CXL-Engram、StreamIndex、SideQuest、Hive、RelayCaching、AMPD、KAIROS、Claude Code、Kimi Swarm、AMD、PolyKV）；修正 [30] URL 为 Hugging Face | 已重建 |
 | **rebuilt.md** | **done** | — | 按 manifest 顺序合并 12 章，805 行，79KB | 已验证 |
