@@ -58,7 +58,19 @@ Georgia Tech 与 Intel 的联合研究（2025-11）表明，典型 agentic 工�
 
 **图2** CPU 竞争对多 GPU LLM 推理的影响。实验显示 CPU oversubscription 可使 dequeue 延迟放大 19 倍，GPU 计算仅占端到端时间的 38%。来源：arXiv:2603.22774 [2]。
 
-### 2.3 推理引擎层面的 CPU 优化——以 vLLM V1 为例
+### 2.3 Agentic 场景为什么更易放大调度墙——Continuum 的量化证据
+
+传统 chat serving 更接近单条请求连续 decode：请求进入后，CPU 只需在开头做一次 prefill 调度，之后让 GPU 连续自回归生成。调度开销容易被计算时间摊平。
+
+Agentic inference 则频繁经历：prefill → decode → 工具调用 → 等待返回 → 恢复 → 可能分叉给多个 subagents → 聚合 → 继续生成的循环。Continuum（arXiv:2511.02230，2026-05）首次系统量化了这种多轮状态切换对调度的放大效应 [41]：
+
+- **Turn-based Eviction**：传统推理引擎（vLLM/SGLang）将 decode 结束视为请求完成，立即驱逐 KV cache；当 tool 返回后，请求必须重新排队等待 GPU 内存，产生 **scheduling bubble**。
+- **量化结果**：由于 scheduling bubble 在每次 tool call 都会发生，多轮累积后可占 agentic 程序总延迟的 **58.2%**。
+- **Per-turn queueing delay**：即使启用 CPU offloading 保存 KV，返回后的请求仍需在等待队列中排队，且每轮都会累积。
+
+NVIDIA Dynamo 的生产数据也描述了同样的模式：典型 coding agent 遵循 "long prefill → tool call → extend prefix → repeat" 的循环，Claude Code 的 lead agent 可运行 20+ turns，期间不断 spawn 和终止 subagents [9]。这意味着 host CPU 的介入频率从传统 chat 的"单次"放大为**与 tool call 次数成正比**的重复调度。
+
+### 2.4 推理引擎层面的 CPU 优化——以 vLLM V1 为例
 
 2025 年 1 月发布的 vLLM V1 是一次针对机头 CPU 开销的系统性重构 [5]：
 - **Persistent Batch**：缓存输入张量，每步仅应用增量 diffs，避免每步重建张量的 Python 开销。
@@ -68,7 +80,7 @@ Georgia Tech 与 Intel 的联合研究（2025-11）表明，典型 agentic 工�
 
 实测显示，V1 在文本模型上吞吐比 V0 提升最高 **1.7×**；在视觉语言模型上提升更为显著。vLLM 2026 Q1 Roadmap 进一步将 "Python overhead reduction"、"CPU KV cache production ready" 与 "disaggregated prefilling" 列为重点，表明社区已明确意识到机头 CPU 是下一阶段的优化主战场。
 
-### 2.4 持久化 Kernel：从软件优化到编译层面消除 Launch 开销
+### 2.5 持久化 Kernel：从软件优化到编译层面消除 Launch 开销
 
 Event Tensor（2026-04，MLSys 审稿）将动态控制流编码为 Tile 级依赖图，生成跨算子的持久化 Megakernel，从根本上消除跨 Kernel 边界同步与 Launch 开销 [4]。这是从"减少 Launch 次数"到"彻底消除 Launch 边界"的范式跃迁，标志着算子下发优化已进入编译器与运行时协同设计阶段。
 
@@ -127,7 +139,24 @@ Grace Hopper / Grace Blackwell 通过 **NVLink-C2C 900 GB/s** 的 coherent inter
 
 ### 3.4 序列压缩 vs 知识解耦：V4 与 Engram 的双轨探索
 
-DeepSeek V4 技术报告（2026-05）揭示了一个重要架构转向：V4 放弃了从 V2 到 V3 使用的 MLA，重回 MQA，但通过 **CSA（Compressed Single Attention，4× 压缩）** 和 **HCA（Hierarchical Compressed Attention，128× 压缩）** 将 1M 上下文的 KV cache 压缩到 V3.2 的约 **10%**，标准 Transformer 的约 **2%** [29]。这是一条"在 attention 内部压缩序列长度"的技术线。
+DeepSeek V4 技术报告（2026-05）揭示了一个重要架构转向：V4 放弃了从 V2 到 V3 使用的 MLA，重回 MQA，但通过 **CSA（Compressed Sparse Attention，4× 压缩）** 和 **HCA（Hierarchical Compressed Attention，128× 压缩）** 将 1M 上下文的 KV cache 压缩到 V3.2 的约 **10%**，标准 Transformer 的约 **2%** [29]。这是一条"在 attention 内部压缩序列长度"的技术线。
+
+**但 CSA 存在一个被忽视的瓶颈：Indexer 步骤才是真正的内存墙。** CSA 的 Lightning Indexer 通过可学习的评分投影 $I(t,s) = \sum_{h} w_{t,h} \cdot \text{ReLU}(q_{t,h} \cdot K_s^C)$ 为每个 query 选择 top-k 个压缩 key。V4 参考实现（`model.py`）和 TileLang 参考实现都将该评分计算为一个融合 einsum，**先物化形状为 `[B, S, H_I, T]` 的 FP32 中间张量**（$H_I=64$，$T=S/4$），再做 head sum 和 top-k [35]。其内存开销如下：
+
+| 序列长度 $S$ | 中间张量大小 | 与 H200 HBM (140 GB) 对比 |
+|---|---|---|
+| 32,768 | 64 GB | 可运行，占 46% HBM |
+| 65,536 | **256 GB** | **OOM**——超单卡上限 |
+| 262,144 | 4 TB | 需多卡或 offload |
+
+StreamIndex 论文指出："The indexer step is what gates CSA at long context, not the attention kernel" [35]。FlashAttention 等优化针对的是 attention kernel，但 CSA pipeline 在 attention 运行之前就在 indexer 步骤 OOM 了——"the pipeline runs out of memory in the indexer step before attention runs"。
+
+这一瓶颈对机头 CPU 有三重直接影响：
+- **当 $S \geq 64K$ 时，Indexer 无法完全在 GPU HBM 内执行，必须借助 CPU DRAM 做 offload 或分块调度**，CPU 成为长序列推理的准入门槛；
+- **StreamIndex 的 chunked partition-merge top-k 虽将峰值 HBM 降至 6.21 GB（$S=1M$），但引入了 host 侧的 chunk 编排逻辑**——需要在 host 侧维护分块状态、合并 per-tile top-k 结果；
+- **在 $S=262K$ 时，chunked indexer 配合 TileLang attention 仍需 18.56 GB 峰值 HBM 和 1.97 秒完成**——对实时服务仍是不可忽视的延迟。
+
+这意味着，CSA 的"压缩"收益（4× 序列压缩）在 indexer 步骤被内存墙部分抵消。DeepSeek V4 能够在 1M 上下文上工作，必然在其内部实现中采用了某种形式的分块或流式索引器——但这一细节并未在技术报告中公开。StreamIndex 作为首个开源的 CSA 非物化实现，揭示了这一隐藏的工程复杂性，也说明机头 CPU 在 CSA 长上下文路径上已从旁观者变为必要的协处理器。
 
 与此同时，Engram（2026-01，arXiv:2601.07372）走的是另一条路：将 Transformer 中静态的"知识型 KV"（如常识、事实、参数化记忆）通过可学习哈希剥离到外部记忆库，推理时以 O(1) 查找替换注意力计算，在 100B 模型上吞吐量损失 **<3%** [30]。
 
@@ -142,7 +171,7 @@ DeepSeek V4 技术报告（2026-05）揭示了一个重要架构转向：V4 放�
 - **RelayCaching（2026-04）**：在多代理协作中识别并复用跨 agent 的公共前缀，实现 >**80%** 的 KV 复用率，TTFT 降低 **4.7×** [32]。
 - **PolyKV（2026-03）**：为 Agent 工作流提供 O(1) 内存复杂度的 KV 管理，消除线性扩展瓶颈 [33]。
 - **Hive（2026-03）**：提出 Agent-Aware KV Cache 管理，在多代理场景下将 cache miss rate 降低 **33–51%** [34]。
-- **StreamIndex（2026-04）**：针对 RAG 长上下文将 256GB 索引压缩到 6.21GB，大幅降低 host 侧内存压力 [35]。
+- **StreamIndex（2026-04）**：针对 CSA Lightning Indexer 的内存瓶颈，通过流式 top-k 将物化中间张量从 256 GB 降至 6.21 GB（$S=1M$），但引入了 host 侧 chunk 编排逻辑 [35]。
 
 ### 3.6 CXL 内存扩展：从技术问题到经济问题
 
@@ -452,7 +481,7 @@ BlueField-4 集成 64 核心 CPU 与 ConnectX-9 SuperNIC，将网络、存储和
 
 [34] Hive: agent-aware KV cache management for multi-agent LLM inference[EB/OL]. 2026.
 
-[35] StreamIndex: compressing retrieval indexes for long-context RAG[EB/OL]. 2026.
+[35] StreamIndex: Memory-Bounded Compressed Sparse Attention via Streaming Top-k[EB/OL]. arXiv:2605.02568, 2026. https://arxiv.org/abs/2605.02568.
 
 [36] AMPD: adaptive multi-agent prefill-decode disaggregation[EB/OL]. 2026.
 
@@ -463,6 +492,8 @@ BlueField-4 集成 64 核心 CPU 与 ConnectX-9 SuperNIC，将网络、存储和
 [39] Moonshot AI. Kimi Agent Swarm: 100 parallel sub-agents for complex task solving[EB/OL]. 2026.
 
 [40] AMD. The evolving CPU:GPU ratio for agentic AI data centers[EB/OL]. 2026.
+
+[41] Continuum: efficient and robust multi-turn LLM agent scheduling with KV cache time-to-live[EB/OL]. arXiv:2511.02230, 2026. https://arxiv.org/abs/2511.02230.
 
 ---
 

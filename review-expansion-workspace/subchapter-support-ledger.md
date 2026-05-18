@@ -5,7 +5,7 @@
 | Ch00 前言 | done | — | 无变化 | — |
 | Ch01 摘要 | **done** | SRC-01,03,13,15-22 | 修正 Engram-V4 关系；补充 Agent Swarm 关键数字（RelayCaching 4.7x、Hive 33-51%、AMPD 67-967%、KAIROS 2-3 orders、Claude Code 1.6%/98.4%、Kimi 100 agents/1,500 tools、AMD 1:1） | 已重建 |
 | Ch02 引言 | **done** | SRC-01,03,13,20 | 修正 Engram 作为 V4 组件的说法；补充 V4 放弃 MLA 重回 MQA；补充 Swarm 并发数字 | 已重建 |
-| Ch03 主线一 | done | — | 无变化 | 内容已充分 |
+| Ch03 主线一 | **done** | SRC-02,03,04,05,21,30,41,50 | 重大重写：将"编排状态机"收窄为"control-path density"概念；明确区分直接证据（kernel launch 95%、host 开销 62%、Continuum scheduling bubbles 58.2%）与推断性证据（Claude Code 98.4% 代码结构、Dynamo router 工程、RAJ 工具延迟）；新增 2.5 节"直接证据的边界与研究空白"，诚实标注推断边界 | 已重建 |
 | Ch04 主线二 | **done** | SRC-01,02,03,04,13,15,16,22 | 3.2 节重写：Engram 与 V4 两条互补路线（含双轨对比表）；新增 3.5 节 SideQuest 模型驱动 KV 管理；新增 3.8 节 Agent Swarm KV 共享（RelayCaching、PolyKV、Hive Agent-Aware）；补充 StreamIndex Indexer 瓶颈数据 | 重大重构，已重建 |
 | Ch05 主线三 | done | — | 无变化 | 内容已充分 |
 | Ch06 主线四 | done | — | 无变化 | 内容已充分 |
